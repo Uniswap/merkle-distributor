@@ -43,22 +43,13 @@ describe('AirdropTokenDistributor', () => {
     })
   })
 
-  describe('#toNode', () => {
-    it('matches js implementation', async () => {
-      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
-      expect(await airdrop.toNode(wallet0.address, BigNumber.from(100))).to.eq(
-        `0x${BalanceTree.toNode(wallet0.address, BigNumber.from(100)).toString('hex')}`
-      )
-    })
-  })
-
   describe('#claim', () => {
     it('fails for empty proof', async () => {
       const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
       await expect(airdrop.claim(wallet0.address, 10, [])).to.be.revertedWith('AirdropTokenDistributor: Invalid proof.')
     })
 
-    describe('success', () => {
+    describe('two account tree', () => {
       let airdrop: Contract
       let tree: BalanceTree
       beforeEach('deploy', async () => {
@@ -79,6 +70,14 @@ describe('AirdropTokenDistributor', () => {
         await expect(airdrop.claim(wallet1.address, 101, proof1, overrides))
           .to.emit(airdrop, 'Claimed')
           .withArgs(wallet1.address, 101)
+      })
+
+      it('cannot allow two claims', async () => {
+        const proof0 = tree.getProof(wallet0.address, BigNumber.from(100))
+        await airdrop.claim(wallet0.address, 100, proof0, overrides)
+        await expect(airdrop.claim(wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
+          'AirdropTokenDistributor: Drop already claimed.'
+        )
       })
 
       it('wrong account fails', async () => {

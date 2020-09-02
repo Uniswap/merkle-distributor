@@ -18,18 +18,11 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
         merkleRoot = merkleRoot_;
     }
 
-    // Returns the node associated with a given account/amount pair.
-    function toNode(address account, uint amount) public pure returns (bytes32) {
-        // TODO(moodysalem): encode or encodePacked? Any ambiguity?
-        return keccak256(abi.encodePacked(account, amount));
-    }
-
     function claim(address account, uint amount, bytes32[] calldata merkleProof) external override {
         require(!isClaimed[account][amount], 'AirdropTokenDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
-        bytes32 node = toNode(account, amount);
-
+        bytes32 node = keccak256(abi.encodePacked(account, amount));
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'AirdropTokenDistributor: Invalid proof.');
 
         // Mark it claimed and send the token.
