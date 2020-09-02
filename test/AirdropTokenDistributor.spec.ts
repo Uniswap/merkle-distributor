@@ -89,6 +89,15 @@ describe('AirdropTokenDistributor', () => {
         )
       })
 
+      it('sets #isClaimed', async () => {
+        const proof0 = tree.getProof(wallet0.address, BigNumber.from(100))
+        expect(await airdrop.isClaimed(wallet0.address, BigNumber.from(100))).to.eq(false)
+        expect(await airdrop.isClaimed(wallet1.address, BigNumber.from(100))).to.eq(false)
+        await airdrop.claim(wallet0.address, 100, proof0, overrides)
+        expect(await airdrop.isClaimed(wallet0.address, BigNumber.from(100))).to.eq(true)
+        expect(await airdrop.isClaimed(wallet1.address, BigNumber.from(100))).to.eq(false)
+      })
+
       it('cannot allow two claims', async () => {
         const proof0 = tree.getProof(wallet0.address, BigNumber.from(100))
         await airdrop.claim(wallet0.address, 100, proof0, overrides)

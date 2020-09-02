@@ -12,5 +12,6 @@ interface IAirdropTokenDistributor {
     // Claim the given amount of the token to the given address. Reverts if the inputs are invalid.
     function claim(address account, uint amount, bytes32[] calldata merkleProof) external;
 
+    // This event is triggered whenever a call to #claim succeeds.
     event Claimed(address account, uint amount);
 }
