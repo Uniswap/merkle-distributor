@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai'
 import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
-import { Contract, BigNumber } from 'ethers'
+import { Contract, BigNumber, constants } from 'ethers'
 
 import Airdrop from '../build/AirdropTokenDistributor.json'
 import TestERC20 from '../build/TestERC20.json'
@@ -168,6 +168,7 @@ describe('AirdropTokenDistributor', () => {
       let airdrop: Contract
       let tree: MerkleTree
       const NUM_ACCOUNTS = 100000 // 100k
+      const NUM_SAMPLES = 25
       const elements = []
       for (let i = 0; i < NUM_ACCOUNTS; i++) {
         const node = BalanceTree.toNode(wallet0.address, BigNumber.from(i + 1))
@@ -177,7 +178,7 @@ describe('AirdropTokenDistributor', () => {
 
       beforeEach('deploy', async () => {
         airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
-        await token.setBalance(airdrop.address, 140000)
+        await token.setBalance(airdrop.address, constants.MaxUint256)
       })
 
       it('gas', async () => {
@@ -191,6 +192,19 @@ describe('AirdropTokenDistributor', () => {
         const tx = await airdrop.claim(wallet0.address, 90000, proof, overrides)
         const receipt = await tx.wait()
         expect(receipt.gasUsed).to.eq(91207)
+      })
+      it('gas average', async () => {
+        let total: BigNumber = BigNumber.from(0)
+        let count: number = 0
+        for (let i = 0; i < NUM_ACCOUNTS; i += NUM_ACCOUNTS / NUM_SAMPLES) {
+          const proof = tree.getProof(BalanceTree.toNode(wallet0.address, BigNumber.from(i + 1)))
+          const tx = await airdrop.claim(wallet0.address, i + 1, proof, overrides)
+          const receipt = await tx.wait()
+          total = total.add(receipt.gasUsed)
+          count++
+        }
+        const average = total.div(count)
+        expect(average).to.eq('76814')
       })
     })
   })
