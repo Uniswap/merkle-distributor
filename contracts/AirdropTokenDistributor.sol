@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 import "./interfaces/IAirdropTokenDistributor.sol";
 
 contract AirdropTokenDistributor is IAirdropTokenDistributor {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     address public immutable override token;
@@ -19,12 +18,17 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
         merkleRoot = merkleRoot_;
     }
 
+    // Returns the node associated with a given account/amount pair.
+    function toNode(address account, uint amount) public pure returns (bytes32) {
+        // TODO(moodysalem): encode or encodePacked? Any ambiguity?
+        return keccak256(abi.encodePacked(account, amount));
+    }
+
     function claim(address account, uint amount, bytes32[] calldata merkleProof) external override {
         require(!isClaimed[account][amount], 'AirdropTokenDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
-        // TODO(moodysalem): encode or encodePacked? Any ambiguity?
-        bytes32 node = keccak256(abi.encode(account, amount));
+        bytes32 node = toNode(account, amount);
 
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'AirdropTokenDistributor: Invalid proof.');
 
