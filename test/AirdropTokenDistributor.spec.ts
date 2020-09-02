@@ -22,7 +22,9 @@ describe('AirdropTokenDistributor', () => {
       gasLimit: 9999999,
     },
   })
-  const [wallet0, wallet1] = provider.getWallets()
+
+  const wallets = provider.getWallets()
+  const [wallet0, wallet1] = wallets
 
   let token: Contract
   beforeEach('deploy token', async () => {
@@ -70,6 +72,21 @@ describe('AirdropTokenDistributor', () => {
         await expect(airdrop.claim(wallet1.address, 101, proof1, overrides))
           .to.emit(airdrop, 'Claimed')
           .withArgs(wallet1.address, 101)
+      })
+
+      it('transfers the token', async () => {
+        const proof0 = tree.getProof(wallet0.address, BigNumber.from(100))
+        expect(await token.balanceOf(wallet0.address)).to.eq(0)
+        await airdrop.claim(wallet0.address, 100, proof0, overrides)
+        expect(await token.balanceOf(wallet0.address)).to.eq(100)
+      })
+
+      it('must have enough to transfer', async () => {
+        const proof0 = tree.getProof(wallet0.address, BigNumber.from(100))
+        await token.setBalance(airdrop.address, 99)
+        await expect(airdrop.claim(wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
+          'ERC20: transfer amount exceeds balance'
+        )
       })
 
       it('cannot allow two claims', async () => {
