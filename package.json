@@ -26,6 +26,7 @@
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
+    "commander": "^6.1.0",
     "ethereum-waffle": "^3.0.0",
     "ethereumjs-util": "^7.0.4",
     "mocha": "^6.2.2",
@@ -40,6 +41,8 @@
     "compile": "waffle",
     "pretest": "yarn compile",
     "test": "mocha",
+    "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
+    "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test"
   }
 }
