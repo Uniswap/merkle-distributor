@@ -518,11 +518,6 @@
   dependencies:
     "@types/node" "*"
 
-"@uniswap/lib@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-1.1.4.tgz#85100cddcdb61e0b7eae9b8e9e21525e147c47f3"
-  integrity sha512-5una/3a2dPzPN0moDBsa9LfTxCjZjEiLEkN75wjwplmDU4oFqneVAzVA3Heq+DadEk3k17cszAbSMcaIu7hLfg==
-
 "@web3-js/scrypt-shim@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@web3-js/scrypt-shim/-/scrypt-shim-0.1.0.tgz#0bf7529ab6788311d3e07586f7d89107c3bea2cc"

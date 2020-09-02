@@ -1,12 +1,12 @@
 {
   "name": "@uniswap/airdrop-token-distributor",
-  "description": "🤨 ERC20 wrapper factory that removes degenerate behavior",
+  "description": "📦 Distributes an airdrop token via merkle proof",
   "version": "1.0.0",
   "homepage": "https://uniswap.org",
   "keywords": [
     "uniswap",
     "erc20",
-    "degenerate"
+    "airdrop"
   ],
   "repository": {
     "type": "git",
@@ -20,8 +20,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "3.1.0",
-    "@uniswap/lib": "1.1.4"
+    "@openzeppelin/contracts": "3.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
