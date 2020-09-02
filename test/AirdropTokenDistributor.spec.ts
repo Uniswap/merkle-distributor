@@ -5,6 +5,7 @@ import { Contract, BigNumber } from 'ethers'
 import Airdrop from '../build/AirdropTokenDistributor.json'
 import TestERC20 from '../build/TestERC20.json'
 import BalanceTree from './balance-tree'
+import MerkleTree from './merkle-tree'
 
 chai.use(solidity)
 
@@ -119,6 +120,13 @@ describe('AirdropTokenDistributor', () => {
           'AirdropTokenDistributor: Invalid proof.'
         )
       })
+
+      it('gas', async () => {
+        const proof = tree.getProof(wallet0.address, BigNumber.from(100))
+        const tx = await airdrop.claim(wallet0.address, 100, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(78054)
+      })
     })
     describe('larger tree', () => {
       let airdrop: Contract
@@ -146,6 +154,43 @@ describe('AirdropTokenDistributor', () => {
         await expect(airdrop.claim(wallets[9].address, 10, proof, overrides))
           .to.emit(airdrop, 'Claimed')
           .withArgs(wallets[9].address, 10)
+      })
+
+      it('gas', async () => {
+        const proof = tree.getProof(wallets[9].address, BigNumber.from(10))
+        const tx = await airdrop.claim(wallets[9].address, 10, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(78881)
+      })
+    })
+
+    describe('realistic size tree', () => {
+      let airdrop: Contract
+      let tree: MerkleTree
+      const NUM_ACCOUNTS = 100000 // 100k
+      const elements = []
+      for (let i = 0; i < NUM_ACCOUNTS; i++) {
+        const node = BalanceTree.toNode(wallet0.address, BigNumber.from(i + 1))
+        elements.push(node)
+      }
+      tree = new MerkleTree(elements)
+
+      beforeEach('deploy', async () => {
+        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
+        await token.setBalance(airdrop.address, 140000)
+      })
+
+      it('gas', async () => {
+        const proof = tree.getProof(BalanceTree.toNode(wallet0.address, BigNumber.from(50000)))
+        const tx = await airdrop.claim(wallet0.address, 50000, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(91211)
+      })
+      it('gas deeper node', async () => {
+        const proof = tree.getProof(BalanceTree.toNode(wallet0.address, BigNumber.from(90000)))
+        const tx = await airdrop.claim(wallet0.address, 90000, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(91207)
       })
     })
   })

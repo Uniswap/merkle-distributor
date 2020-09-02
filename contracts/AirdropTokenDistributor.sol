@@ -2,13 +2,10 @@
 pragma solidity =0.6.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 import "./interfaces/IAirdropTokenDistributor.sol";
 
 contract AirdropTokenDistributor is IAirdropTokenDistributor {
-    using SafeERC20 for IERC20;
-
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
     mapping(address => mapping(uint => bool)) public override isClaimed;
@@ -27,7 +24,7 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
 
         // Mark it claimed and send the token.
         isClaimed[account][amount] = true;
-        IERC20(token).safeTransfer(account, amount);
+        require(IERC20(token).transfer(account, amount), 'AirdropTokenDistributor: Transfer failed.');
 
         emit Claimed(account, amount);
     }
