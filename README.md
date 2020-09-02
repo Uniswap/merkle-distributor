@@ -1,7 +1,7 @@
-# @uniswap/token-wrapper-factory
+# @uniswap/airdrop-token-distributor
 
-![Tests](https://github.com/Uniswap/token-wrapper-factory/workflows/Tests/badge.svg)
-![Lint](https://github.com/Uniswap/token-wrapper-factory/workflows/Lint/badge.svg)
+![Tests](https://github.com/Uniswap/airdrop-token-distributor/workflows/Tests/badge.svg)
+![Lint](https://github.com/Uniswap/airdrop-token-distributor/workflows/Lint/badge.svg)
 
 This repository contains an ERC20 token wrapper factory.
 
