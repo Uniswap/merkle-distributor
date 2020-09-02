@@ -23,7 +23,8 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
         require(!isClaimed[account][amount], 'AirdropTokenDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(account, amount));
+        // TODO(moodysalem): encode or encodePacked? Any ambiguity?
+        bytes32 node = keccak256(abi.encode(account, amount));
 
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'AirdropTokenDistributor: Invalid proof.');
 

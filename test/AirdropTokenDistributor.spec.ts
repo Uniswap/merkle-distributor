@@ -34,4 +34,18 @@ describe('AirdropTokenDistributor', () => {
       expect(await airdrop.token()).to.eq(token.address)
     })
   })
+
+  describe('#merkleRoot', () => {
+    it('returns the zero merkle root', async () => {
+      const airdrop = await deployContract(wallet, Airdrop, [token.address, ZERO_BYTES32], overrides)
+      expect(await airdrop.merkleRoot()).to.eq(ZERO_BYTES32)
+    })
+  })
+
+  describe('#claim', () => {
+    it('fails for empty proof', async () => {
+      const airdrop = await deployContract(wallet, Airdrop, [token.address, ZERO_BYTES32], overrides)
+      await expect(airdrop.claim(wallet.address, 10, [])).to.be.revertedWith('AirdropTokenDistributor: Invalid proof.')
+    })
+  })
 })
