@@ -111,5 +111,33 @@ describe('AirdropTokenDistributor', () => {
         )
       })
     })
+    describe('larger tree', () => {
+      let airdrop: Contract
+      let tree: BalanceTree
+      beforeEach('deploy', async () => {
+        tree = new BalanceTree(
+          wallets.reduce<{ [address: string]: BigNumber }>((memo, wallet, ix) => {
+            memo[wallet.address] = BigNumber.from(ix + 1)
+            return memo
+          }, {})
+        )
+        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
+        await token.setBalance(airdrop.address, 201)
+      })
+
+      it('claim index 4', async () => {
+        const proof = tree.getProof(wallets[4].address, BigNumber.from(5))
+        await expect(airdrop.claim(wallets[4].address, 5, proof, overrides))
+          .to.emit(airdrop, 'Claimed')
+          .withArgs(wallets[4].address, 5)
+      })
+
+      it('claim index 9', async () => {
+        const proof = tree.getProof(wallets[9].address, BigNumber.from(10))
+        await expect(airdrop.claim(wallets[9].address, 10, proof, overrides))
+          .to.emit(airdrop, 'Claimed')
+          .withArgs(wallets[9].address, 10)
+      })
+    })
   })
 })
