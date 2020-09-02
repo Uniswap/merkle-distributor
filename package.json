@@ -1,0 +1,45 @@
+{
+  "name": "@uniswap/token-wrapper-factory",
+  "description": "🤨 ERC20 wrapper factory that removes degenerate behavior",
+  "version": "1.0.0",
+  "homepage": "https://uniswap.org",
+  "keywords": [
+    "uniswap",
+    "erc20",
+    "degenerate"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Uniswap/token-wrapper-factory"
+  },
+  "files": [
+    "contracts",
+    "build"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "3.1.0",
+    "@uniswap/lib": "1.1.4"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.6",
+    "@types/mocha": "^5.2.7",
+    "chai": "^4.2.0",
+    "ethereum-waffle": "^3.0.0",
+    "mocha": "^6.2.2",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.0",
+    "solc": "0.6.11",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  },
+  "scripts": {
+    "precompile": "rimraf ./build/",
+    "compile": "waffle",
+    "pretest": "yarn compile",
+    "test": "mocha",
+    "prepublishOnly": "yarn test"
+  }
+}
