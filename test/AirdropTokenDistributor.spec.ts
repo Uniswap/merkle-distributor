@@ -170,6 +170,25 @@ describe('AirdropTokenDistributor', () => {
         const receipt = await tx.wait()
         expect(receipt.gasUsed).to.eq(80974)
       })
+
+      it('gas second down about 15k', async () => {
+        await airdrop.claim(
+          0,
+          wallets[0].address,
+          1,
+          tree.getProof(0, wallets[0].address, BigNumber.from(1)),
+          overrides
+        )
+        const tx = await airdrop.claim(
+          1,
+          wallets[1].address,
+          2,
+          tree.getProof(1, wallets[1].address, BigNumber.from(2)),
+          overrides
+        )
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(65954)
+      })
     })
 
     describe('realistic size tree', () => {
