@@ -3,9 +3,7 @@ import BalanceTree from './balance-tree'
 
 const { isAddress, getAddress } = utils
 
-export function parseBalanceMap(balanceMap: {
-  [account: string]: string
-}): {
+interface AirdropInfo {
   merkleRoot: string
   tokenTotal: string
   numDrops: number
@@ -16,7 +14,9 @@ export function parseBalanceMap(balanceMap: {
       proof: string[]
     }
   }
-} {
+}
+
+export function parseBalanceMap(balanceMap: { [account: string]: string }): AirdropInfo {
   const mapped = Object.keys(balanceMap).reduce<{ [address: string]: BigNumber }>((memo, account) => {
     if (!isAddress(account)) {
       throw new Error(`Found invalid address: ${account}`)
