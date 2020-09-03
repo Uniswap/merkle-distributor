@@ -8,24 +8,42 @@ import "./interfaces/IAirdropTokenDistributor.sol";
 contract AirdropTokenDistributor is IAirdropTokenDistributor {
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
-    mapping(address => mapping(uint => bool)) public override isClaimed;
+    uint256 public immutable override numDrops;
 
-    constructor(address token_, bytes32 merkleRoot_) public {
+    // This is a packed array of booleans.
+    mapping(uint256 => uint256) private claimedBitMap;
+
+    constructor(address token_, bytes32 merkleRoot_, uint numDrops_) public {
         token = token_;
         merkleRoot = merkleRoot_;
+        numDrops = numDrops_;
     }
 
-    function claim(address account, uint amount, bytes32[] calldata merkleProof) external override {
-        require(!isClaimed[account][amount], 'AirdropTokenDistributor: Drop already claimed.');
+    function isClaimed(uint256 index) public view override returns (bool) {
+        uint256 claimedWordIndex = index / 256;
+        uint256 claimedBitIndex = index % 256;
+        uint256 claimedWord = claimedBitMap[claimedWordIndex];
+        return (claimedWord & (1 << claimedBitIndex)) == 1;
+    }
+
+    function _setClaimed(uint256 index) private {
+        uint256 claimedWordIndex = index / 256;
+        uint256 claimedBitIndex = index % 256;
+        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
+    }
+
+    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+        require(index < numDrops, 'AirdropTokenDistributor: Invalid index.');
+        require(!isClaimed(index), 'AirdropTokenDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(account, amount));
+        bytes32 node = keccak256(abi.encodePacked(index, account, amount));
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'AirdropTokenDistributor: Invalid proof.');
 
         // Mark it claimed and send the token.
-        isClaimed[account][amount] = true;
+        _setClaimed(index);
         require(IERC20(token).transfer(account, amount), 'AirdropTokenDistributor: Transfer failed.');
 
-        emit Claimed(account, amount);
+        emit Claimed(index, account, amount);
     }
 }
