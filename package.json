@@ -1,7 +1,10 @@
 {
   "name": "@uniswap/airdrop-token-distributor",
-  "description": "📦 Distributes an airdrop token via merkle proof",
-  "version": "1.0.0",
+  "author": {
+    "name": "Moody Salem"
+  },
+  "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
+  "version": "1.0.0-alpha.0",
   "homepage": "https://uniswap.org",
   "keywords": [
     "uniswap",
@@ -13,7 +16,6 @@
     "url": "https://github.com/Uniswap/airdrop-token-distributor"
   },
   "files": [
-    "contracts",
     "build"
   ],
   "engines": {
