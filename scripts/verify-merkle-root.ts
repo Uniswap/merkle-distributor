@@ -84,8 +84,10 @@ if (typeof json !== 'object') throw new Error('Invalid JSON')
 const merkleRootHex = json.merkleRoot
 const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 
-let balances = []
-for (const address in json.claims) {
+let balances: { index: number; account: string; amount: BigNumber }[] = []
+let valid = true
+
+Object.keys(json.claims).forEach((address) => {
   const claim = json.claims[address]
   const proof = claim.proof.map((p: string) => Buffer.from(p.slice(2), 'hex'))
   balances.push({ index: claim.index, account: address, amount: BigNumber.from(claim.amount) })
@@ -93,7 +95,13 @@ for (const address in json.claims) {
     console.log('Verified proof for', claim.index, address)
   } else {
     console.log('Verification for', address, 'failed')
+    valid = false
   }
+})
+
+if (!valid) {
+  console.error('Failed validation for 1 or more proofs')
+  process.exit(1)
 }
 console.log('Done!')
 
