@@ -57,12 +57,12 @@ const getNextLayer = (elements: Buffer[]): Buffer[] => {
   }, [])
 }
 
-const getRoot = (balances: { account: string; amount: BigNumber }[]): Buffer => {
-  let nodes = balances.map(({ account, amount }, index) => {
-    return toNode(index, account, amount)
-  })
-  nodes = [...nodes]
-  nodes.sort(Buffer.compare)
+const getRoot = (balances: { account: string; amount: BigNumber, index: number }[]): Buffer => {
+  let nodes = balances.map(({ account, amount , index }) => 
+          toNode(index, account, amount),
+  )
+  // sort by lexicographical order
+  .sort(Buffer.compare)
 
   // deduplicate any eleents
   nodes = nodes.filter((el, idx) => {
@@ -88,9 +88,10 @@ const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 let balances = []
 for (const address in json.claims) {
   const claim = json.claims[address]
-  balances.push({ account: address, amount: BigNumber.from(claim.amount) })
-  if (verifyProof(claim.index, address, claim.amount, claim.proof, merkleRoot)) {
-    console.log('Verified proof for', address)
+  const proof = claim.proof.map((p: string) => Buffer.from(p.slice(2), 'hex'))
+  balances.push({ index: claim.index, account: address, amount: BigNumber.from(claim.amount) })
+  if (verifyProof(claim.index, address, claim.amount, proof, merkleRoot)) {
+    console.log('Verified proof for', claim.index, address)
   } else {
     console.log('Verification for', address, 'failed')
   }
