@@ -10,7 +10,6 @@ const { isAddress, getAddress } = utils
 interface AirdropInfo {
   merkleRoot: string
   tokenTotal: string
-  numDrops: number
   claims: {
     [account: string]: {
       index: number
@@ -57,7 +56,6 @@ export function parseBalanceMap(balanceMap: { [account: string]: string }): Aird
   return {
     merkleRoot: tree.getHexRoot(),
     tokenTotal: tokenTotal.toHexString(),
-    numDrops: treeElements.length,
     claims: proofs,
   }
 }

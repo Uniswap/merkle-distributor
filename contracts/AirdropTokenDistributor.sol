@@ -8,15 +8,13 @@ import "./interfaces/IAirdropTokenDistributor.sol";
 contract AirdropTokenDistributor is IAirdropTokenDistributor {
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
-    uint256 public immutable override numDrops;
 
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address token_, bytes32 merkleRoot_, uint numDrops_) public {
+    constructor(address token_, bytes32 merkleRoot_) public {
         token = token_;
         merkleRoot = merkleRoot_;
-        numDrops = numDrops_;
     }
 
     function isClaimed(uint256 index) public view override returns (bool) {
@@ -33,7 +31,6 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
-        require(index < numDrops, 'AirdropTokenDistributor: Invalid index.');
         require(!isClaimed(index), 'AirdropTokenDistributor: Drop already claimed.');
 
         // Verify the merkle proof.

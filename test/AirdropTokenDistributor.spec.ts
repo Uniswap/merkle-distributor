@@ -34,30 +34,30 @@ describe('AirdropTokenDistributor', () => {
 
   describe('#token', () => {
     it('returns the token address', async () => {
-      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32, 0], overrides)
+      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
       expect(await airdrop.token()).to.eq(token.address)
     })
   })
 
   describe('#merkleRoot', () => {
     it('returns the zero merkle root', async () => {
-      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32, 0], overrides)
+      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
       expect(await airdrop.merkleRoot()).to.eq(ZERO_BYTES32)
     })
   })
 
   describe('#claim', () => {
     it('fails for empty proof', async () => {
-      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32, 1], overrides)
+      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
       await expect(airdrop.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
         'AirdropTokenDistributor: Invalid proof.'
       )
     })
 
     it('fails for invalid index', async () => {
-      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32, 0], overrides)
+      const airdrop = await deployContract(wallet0, Airdrop, [token.address, ZERO_BYTES32], overrides)
       await expect(airdrop.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
-        'AirdropTokenDistributor: Invalid index.'
+        'AirdropTokenDistributor: Invalid proof.'
       )
     })
 
@@ -69,7 +69,7 @@ describe('AirdropTokenDistributor', () => {
           { account: wallet0.address, amount: BigNumber.from(100) },
           { account: wallet1.address, amount: BigNumber.from(101) },
         ])
-        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot(), 2], overrides)
+        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
         await token.setBalance(airdrop.address, 201)
       })
 
@@ -134,7 +134,7 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(0, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(78480)
+        expect(receipt.gasUsed).to.eq(78457)
       })
     })
     describe('larger tree', () => {
@@ -146,7 +146,7 @@ describe('AirdropTokenDistributor', () => {
             return { account: wallet.address, amount: BigNumber.from(ix + 1) }
           })
         )
-        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot(), wallets.length], overrides)
+        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
         await token.setBalance(airdrop.address, 201)
       })
 
@@ -168,7 +168,7 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(9, wallets[9].address, BigNumber.from(10))
         const tx = await airdrop.claim(9, wallets[9].address, 10, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(80974)
+        expect(receipt.gasUsed).to.eq(80951)
       })
 
       it('gas second down about 15k', async () => {
@@ -187,7 +187,7 @@ describe('AirdropTokenDistributor', () => {
           overrides
         )
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(65954)
+        expect(receipt.gasUsed).to.eq(65931)
       })
     })
 
@@ -204,7 +204,7 @@ describe('AirdropTokenDistributor', () => {
       tree = new BalanceTree(elements)
 
       beforeEach('deploy', async () => {
-        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot(), NUM_LEAVES], overrides)
+        airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
         await token.setBalance(airdrop.address, constants.MaxUint256)
       })
 
@@ -212,13 +212,13 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(50000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91664)
+        expect(receipt.gasUsed).to.eq(91641)
       })
       it('gas deeper node', async () => {
         const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(90000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91600)
+        expect(receipt.gasUsed).to.eq(91577)
       })
       it('gas average random distribution', async () => {
         let total: BigNumber = BigNumber.from(0)
@@ -231,7 +231,7 @@ describe('AirdropTokenDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(77089)
+        expect(average).to.eq(77066)
       })
       // this is what we gas golfed by packing the bitmap
       it('gas average first 25', async () => {
@@ -245,7 +245,7 @@ describe('AirdropTokenDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(62838)
+        expect(average).to.eq(62815)
       })
     })
   })
@@ -260,15 +260,14 @@ describe('AirdropTokenDistributor', () => {
       }
     }
     beforeEach('deploy', async () => {
-      const { claims: innerClaims, merkleRoot, numDrops, tokenTotal } = parseBalanceMap({
+      const { claims: innerClaims, merkleRoot, tokenTotal } = parseBalanceMap({
         [wallet0.address]: '200',
         [wallet1.address]: '300',
         [wallets[2].address]: '250',
       })
-      expect(numDrops).to.eq(3)
       expect(tokenTotal).to.eq('0x02ee') // 750
       claims = innerClaims
-      airdrop = await deployContract(wallet0, Airdrop, [token.address, merkleRoot, numDrops], overrides)
+      airdrop = await deployContract(wallet0, Airdrop, [token.address, merkleRoot], overrides)
       await token.setBalance(airdrop.address, tokenTotal)
     })
 
