@@ -1,7 +1,7 @@
 import { program } from 'commander'
 import { ethers } from 'ethers'
 import fs from 'fs'
-import { parseBalanceMap } from '../src/parse-balance-map'
+import BalanceTree from '../src/balance-tree'
 
 program
   .version('0.0.0')
@@ -29,15 +29,24 @@ const ABI = [
 ]
 
 ;(async () => {
-    const map = parseBalanceMap(json)
     const provider = new ethers.providers.JsonRpcProvider(program.url)
     const airdrop = new ethers.Contract(program.address, ABI, provider)
+    const merkleRootHex = await airdrop.merkleRoot()
+    const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 
-    const merkleRoot = await airdrop.merkleRoot()
-
-    if (merkleRoot === map.merkleRoot) {
-        console.log("Success! Merkle roots match")
-    } else {
-        console.log("ALERT! Merkle roots do not match. DO NOT USE THE AIRDROP!")
+    for (const address in json.claims)  {
+        const claim = json.claims[address]
+        if (BalanceTree.verifyProof(
+            claim.index,
+            address,
+            claim.amount,
+            claim.proof,
+            merkleRoot
+        )) {
+            console.log("Verified proof for", address)
+        } else {
+            console.log("Verification for", address, "failed")
+        }
     }
+    console.log("Done!")
 })()

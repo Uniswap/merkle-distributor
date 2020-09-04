@@ -35,14 +35,14 @@ export default class MerkleTree {
     return elements.reduce<Buffer[]>((layer, el, idx, arr) => {
       if (idx % 2 === 0) {
         // Hash the current element with its pair element
-        layer.push(this.combinedHash(el, arr[idx + 1]))
+        layer.push(MerkleTree.combinedHash(el, arr[idx + 1]))
       }
 
       return layer
     }, [])
   }
 
-  combinedHash(first: Buffer, second: Buffer): Buffer {
+  static combinedHash(first: Buffer, second: Buffer): Buffer {
     if (!first) {
       return second
     }
@@ -50,7 +50,7 @@ export default class MerkleTree {
       return first
     }
 
-    return keccak256(this.sortAndConcat(first, second))
+    return keccak256(MerkleTree.sortAndConcat(first, second))
   }
 
   getRoot(): Buffer {
@@ -60,6 +60,7 @@ export default class MerkleTree {
   getHexRoot(): string {
     return bufferToHex(this.getRoot())
   }
+  
 
   getProof(el: Buffer) {
     let idx = this.bufIndexOf(el, this.elements)
@@ -130,7 +131,7 @@ export default class MerkleTree {
     return arr.map((el) => '0x' + el.toString('hex'))
   }
 
-  sortAndConcat(...args: Buffer[]): Buffer {
+  static sortAndConcat(...args: Buffer[]): Buffer {
     return Buffer.concat([...args].sort(Buffer.compare))
   }
 }
