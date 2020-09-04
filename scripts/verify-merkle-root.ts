@@ -57,12 +57,11 @@ const getNextLayer = (elements: Buffer[]): Buffer[] => {
   }, [])
 }
 
-const getRoot = (balances: { account: string; amount: BigNumber, index: number }[]): Buffer => {
-  let nodes = balances.map(({ account, amount , index }) => 
-          toNode(index, account, amount),
-  )
-  // sort by lexicographical order
-  .sort(Buffer.compare)
+const getRoot = (balances: { account: string; amount: BigNumber; index: number }[]): Buffer => {
+  let nodes = balances
+    .map(({ account, amount, index }) => toNode(index, account, amount))
+    // sort by lexicographical order
+    .sort(Buffer.compare)
 
   // deduplicate any eleents
   nodes = nodes.filter((el, idx) => {
