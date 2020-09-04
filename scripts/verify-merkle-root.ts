@@ -26,6 +26,15 @@ const combinedHash = (first: Buffer, second: Buffer): Buffer => {
   )
 }
 
+const toNode = (
+  index: number | BigNumber,
+  account: string,
+  amount: BigNumber,
+): Buffer => {
+  const pairHex = utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount])
+  return Buffer.from(pairHex.slice(2), 'hex')
+}
+
 const verifyProof = (
   index: number | BigNumber,
   account: string,
@@ -33,9 +42,7 @@ const verifyProof = (
   proof: Buffer[],
   root: Buffer
 ): boolean => {
-  const pairHex = utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount])
-  let pair = Buffer.from(pairHex.slice(2), 'hex')
-
+  let pair = toNode(index, account, amount)
   for (const item of proof) {
     pair = combinedHash(pair, item)
   }
@@ -43,13 +50,49 @@ const verifyProof = (
   return pair.equals(root)
 }
 
+const getNextLayer = (elements: Buffer[]): Buffer[] => {
+    return elements.reduce<Buffer[]>((layer, el, idx, arr) => {
+      if (idx % 2 === 0) {
+        // Hash the current element with its pair element
+        layer.push(combinedHash(el, arr[idx + 1]))
+      }
+
+      return layer
+    }, [])
+}
+
+const getRoot = (balances: { account: string; amount: BigNumber }[]): Buffer => {
+    let nodes = balances.map(({ account, amount }, index) => {
+        return toNode(index, account, amount)
+    })
+    nodes = [...nodes]
+    nodes.sort(Buffer.compare)
+
+    // deduplicate any eleents
+    nodes = nodes.filter((el, idx) => {
+      return idx === 0 || !nodes[idx - 1].equals(el)
+    })
+
+    const layers = []
+    layers.push(nodes)
+
+    // Get next layer until we reach the root
+    while (layers[layers.length - 1].length > 1) {
+      layers.push(getNextLayer(layers[layers.length - 1]))
+    }
+
+    return layers[layers.length - 1][0]
+}
+
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
 const merkleRootHex = json.merkleRoot
 const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 
+let balances = []
 for (const address in json.claims) {
   const claim = json.claims[address]
+  balances.push({ account: address, amount: BigNumber.from(claim.amount) })
   if (verifyProof(claim.index, address, claim.amount, claim.proof, merkleRoot)) {
     console.log('Verified proof for', address)
   } else {
@@ -57,3 +100,8 @@ for (const address in json.claims) {
   }
 }
 console.log('Done!')
+
+// Root
+const root = getRoot(balances).toString('hex')
+console.log("Reconstructed merkle root", root)
+console.log("Root matches the one read from the JSON?", root === merkleRootHex.slice(2))
