@@ -204,17 +204,13 @@ describe('AirdropTokenDistributor', () => {
       tree = new BalanceTree(elements)
 
       it('proof verification works', () => {
-          const root = Buffer.from(tree.getHexRoot().slice(2), 'hex')
+        const root = Buffer.from(tree.getHexRoot().slice(2), 'hex')
         for (let i = 0; i < NUM_LEAVES; i += NUM_LEAVES / NUM_SAMPLES) {
-            const proof = tree.getProof(i, wallet0.address, BigNumber.from(100)).map(el => Buffer.from(el.slice(2), 'hex'))
-            const validProof = BalanceTree.verifyProof(
-                i,
-                wallet0.address,
-                BigNumber.from(100),
-                proof,
-                root
-            )
-            expect(validProof).to.be.true
+          const proof = tree
+            .getProof(i, wallet0.address, BigNumber.from(100))
+            .map((el) => Buffer.from(el.slice(2), 'hex'))
+          const validProof = BalanceTree.verifyProof(i, wallet0.address, BigNumber.from(100), proof, root)
+          expect(validProof).to.be.true
         }
       })
 

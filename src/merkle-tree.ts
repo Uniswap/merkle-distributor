@@ -60,7 +60,6 @@ export default class MerkleTree {
   getHexRoot(): string {
     return bufferToHex(this.getRoot())
   }
-  
 
   getProof(el: Buffer) {
     let idx = this.bufIndexOf(el, this.elements)

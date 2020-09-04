@@ -11,13 +11,19 @@ export default class BalanceTree {
     )
   }
 
-  public static verifyProof(index: number | BigNumber, account: string, amount: BigNumber, proof: Buffer[], root: Buffer): boolean {
-      let pair = BalanceTree.toNode(index, account, amount)
-      for (const item of proof) {
-          pair = MerkleTree.combinedHash(pair, item)
-      }
+  public static verifyProof(
+    index: number | BigNumber,
+    account: string,
+    amount: BigNumber,
+    proof: Buffer[],
+    root: Buffer
+  ): boolean {
+    let pair = BalanceTree.toNode(index, account, amount)
+    for (const item of proof) {
+      pair = MerkleTree.combinedHash(pair, item)
+    }
 
-      return pair.equals(root)
+    return pair.equals(root)
   }
 
   // keccak256(abi.encode(account, amount))
