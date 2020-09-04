@@ -4,7 +4,7 @@
     "name": "Moody Salem"
   },
   "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "homepage": "https://uniswap.org",
   "keywords": [
     "uniswap",
