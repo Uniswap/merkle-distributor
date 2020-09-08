@@ -116,6 +116,24 @@ describe('AirdropTokenDistributor', () => {
         )
       })
 
+      it('cannot claim more than once: 0 and then 1', async () => {
+        await airdrop.claim(0, wallet0.address, 100, tree.getProof(0, wallet0.address, BigNumber.from(100)), overrides)
+        await airdrop.claim(1, wallet1.address, 101, tree.getProof(1, wallet1.address, BigNumber.from(101)), overrides)
+
+        await expect(
+          airdrop.claim(0, wallet0.address, 100, tree.getProof(0, wallet0.address, BigNumber.from(100)), overrides)
+        ).to.be.revertedWith('AirdropTokenDistributor: Drop already claimed.')
+      })
+
+      it('cannot claim more than once: 1 and then 0', async () => {
+        await airdrop.claim(1, wallet1.address, 101, tree.getProof(1, wallet1.address, BigNumber.from(101)), overrides)
+        await airdrop.claim(0, wallet0.address, 100, tree.getProof(0, wallet0.address, BigNumber.from(100)), overrides)
+
+        await expect(
+          airdrop.claim(1, wallet1.address, 101, tree.getProof(1, wallet1.address, BigNumber.from(101)), overrides)
+        ).to.be.revertedWith('AirdropTokenDistributor: Drop already claimed.')
+      })
+
       it('cannot claim for address other than proof', async () => {
         const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
         await expect(airdrop.claim(1, wallet1.address, 101, proof0, overrides)).to.be.revertedWith(
@@ -134,7 +152,7 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(0, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(78457)
+        expect(receipt.gasUsed).to.eq(78466)
       })
     })
     describe('larger tree', () => {
@@ -168,7 +186,7 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(9, wallets[9].address, BigNumber.from(10))
         const tx = await airdrop.claim(9, wallets[9].address, 10, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(80951)
+        expect(receipt.gasUsed).to.eq(80960)
       })
 
       it('gas second down about 15k', async () => {
@@ -187,7 +205,7 @@ describe('AirdropTokenDistributor', () => {
           overrides
         )
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(65931)
+        expect(receipt.gasUsed).to.eq(65940)
       })
     })
 
@@ -223,13 +241,13 @@ describe('AirdropTokenDistributor', () => {
         const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(50000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91641)
+        expect(receipt.gasUsed).to.eq(91650)
       })
       it('gas deeper node', async () => {
         const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
         const tx = await airdrop.claim(90000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91577)
+        expect(receipt.gasUsed).to.eq(91586)
       })
       it('gas average random distribution', async () => {
         let total: BigNumber = BigNumber.from(0)
@@ -242,7 +260,7 @@ describe('AirdropTokenDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(77066)
+        expect(average).to.eq(77075)
       })
       // this is what we gas golfed by packing the bitmap
       it('gas average first 25', async () => {
@@ -256,7 +274,17 @@ describe('AirdropTokenDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(62815)
+        expect(average).to.eq(62824)
+      })
+
+      it('no double claims in random distribution', async () => {
+        for (let i = 0; i < 25; i += Math.floor(Math.random() * (NUM_LEAVES / NUM_SAMPLES))) {
+          const proof = tree.getProof(i, wallet0.address, BigNumber.from(100))
+          await airdrop.claim(i, wallet0.address, 100, proof, overrides)
+          await expect(airdrop.claim(i, wallet0.address, 100, proof, overrides)).to.be.revertedWith(
+            'AirdropTokenDistributor: Drop already claimed.'
+          )
+        }
       })
     })
   })
@@ -308,12 +336,15 @@ describe('AirdropTokenDistributor', () => {
       })
     })
 
-    it('all proofs work', async () => {
+    it('all claims work exactly once', async () => {
       for (let account in claims) {
-        const proof = claims[account]
-        await expect(airdrop.claim(proof.index, account, proof.amount, proof.proof, overrides))
+        const claim = claims[account]
+        await expect(airdrop.claim(claim.index, account, claim.amount, claim.proof, overrides))
           .to.emit(airdrop, 'Claimed')
-          .withArgs(proof.index, account, proof.amount)
+          .withArgs(claim.index, account, claim.amount)
+        await expect(airdrop.claim(claim.index, account, claim.amount, claim.proof, overrides)).to.be.revertedWith(
+          'AirdropTokenDistributor: Drop already claimed.'
+        )
       }
       expect(await token.balanceOf(airdrop.address)).to.eq(0)
     })

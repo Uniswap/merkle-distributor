@@ -36,7 +36,7 @@ export function parseBalanceMap(balanceMap: { [account: string]: string }): Aird
 
   const tree = new BalanceTree(treeElements)
 
-  const proofs = treeElements.reduce<{ [address: string]: { amount: string; index: number; proof: string[] } }>(
+  const claims = treeElements.reduce<{ [address: string]: { amount: string; index: number; proof: string[] } }>(
     (memo, { account, amount }, index) => {
       memo[account] = {
         index,
@@ -56,6 +56,6 @@ export function parseBalanceMap(balanceMap: { [account: string]: string }): Aird
   return {
     merkleRoot: tree.getHexRoot(),
     tokenTotal: tokenTotal.toHexString(),
-    claims: proofs,
+    claims,
   }
 }
