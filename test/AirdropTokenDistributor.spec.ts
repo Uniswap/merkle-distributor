@@ -70,7 +70,7 @@ describe('AirdropTokenDistributor', () => {
           { account: wallet1.address, amount: BigNumber.from(101) },
         ])
         airdrop = await deployContract(wallet0, Airdrop, [token.address, tree.getHexRoot()], overrides)
-        await token.setBalance(airdrop.address, 201)
+        await token.setBalance(airdrop.address, 202)
       })
 
       it('successful claim', async () => {
@@ -108,10 +108,10 @@ describe('AirdropTokenDistributor', () => {
         expect(await airdrop.isClaimed(1)).to.eq(false)
       })
 
-      it('cannot allow two claims', async () => {
-        const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
-        await airdrop.claim(0, wallet0.address, 100, proof0, overrides)
-        await expect(airdrop.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
+      it.only('cannot allow two claims', async () => {
+        const proof0 = tree.getProof(1, wallet1.address, BigNumber.from(101))
+        await airdrop.claim(1, wallet1.address, 101, proof0, overrides)
+        await expect(airdrop.claim(1, wallet1.address, 101, proof0, overrides)).to.be.revertedWith(
           'AirdropTokenDistributor: Drop already claimed.'
         )
       })
