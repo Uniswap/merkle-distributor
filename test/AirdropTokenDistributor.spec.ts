@@ -111,6 +111,7 @@ describe('AirdropTokenDistributor', () => {
       it.only('cannot allow two claims', async () => {
         const proof0 = tree.getProof(1, wallet1.address, BigNumber.from(101))
         await airdrop.claim(1, wallet1.address, 101, proof0, overrides)
+        expect(await airdrop.isClaimed(1)).to.eq(true)
         await expect(airdrop.claim(1, wallet1.address, 101, proof0, overrides)).to.be.revertedWith(
           'AirdropTokenDistributor: Drop already claimed.'
         )
