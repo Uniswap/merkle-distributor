@@ -21,7 +21,7 @@ contract AirdropTokenDistributor is IAirdropTokenDistributor {
         uint256 claimedWordIndex = index / 256;
         uint256 claimedBitIndex = index % 256;
         uint256 claimedWord = claimedBitMap[claimedWordIndex];
-        return (claimedWord & (1 << claimedBitIndex)) == 1;
+        return (claimedWord & (1 << claimedBitIndex)) == (1 << claimedBitIndex);
     }
 
     function _setClaimed(uint256 index) private {
