@@ -7,7 +7,7 @@ const { isAddress, getAddress } = utils
 // It is completely sufficient for recreating the entire merkle tree.
 // Anyone can verify that all air drops are included in the tree,
 // and the tree has no additional distributions.
-interface AirdropInfo {
+interface MerkleDistributorInfo {
   merkleRoot: string
   tokenTotal: string
   claims: {
@@ -19,7 +19,7 @@ interface AirdropInfo {
   }
 }
 
-export function parseBalanceMap(balanceMap: { [account: string]: string }): AirdropInfo {
+export function parseBalanceMap(balanceMap: { [account: string]: string }): MerkleDistributorInfo {
   const mapped = Object.keys(balanceMap).reduce<{ [address: string]: BigNumber }>((memo, account) => {
     if (!isAddress(account)) {
       throw new Error(`Found invalid address: ${account}`)

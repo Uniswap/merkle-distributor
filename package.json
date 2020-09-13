@@ -1,5 +1,5 @@
 {
-  "name": "@uniswap/airdrop-token-distributor",
+  "name": "@uniswap/merkle-distributor",
   "author": {
     "name": "Moody Salem"
   },
@@ -8,12 +8,11 @@
   "homepage": "https://uniswap.org",
   "keywords": [
     "uniswap",
-    "erc20",
-    "airdrop"
+    "erc20"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/airdrop-token-distributor"
+    "url": "https://github.com/Uniswap/merkle-distributor"
   },
   "files": [
     "build"

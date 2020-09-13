@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0;
 
 // Allows anyone to claim a token if they exist in a merkle root.
-interface IAirdropTokenDistributor {
+interface IMerkleDistributor {
     // Returns the address of the token distributed by this contract.
     function token() external view returns (address);
     // Returns the merkle root of the merkle tree containing account balances available to claim.
