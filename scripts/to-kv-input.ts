@@ -7,6 +7,7 @@ program
     '-i, --input <path>',
     'input JSON file location containing a map of account addresses to string balances'
   )
+  .requiredOption('-c, --chain-id <number>', 'chain ID of the merkle kv root')
 
 program.parse(process.argv)
 
@@ -19,7 +20,7 @@ console.log(
     Object.keys(json.claims).map((account) => {
       const claim = json.claims[account]
       return {
-        key: account,
+        key: `${program.chainId}:${account}`,
         value: JSON.stringify(claim),
       }
     })
