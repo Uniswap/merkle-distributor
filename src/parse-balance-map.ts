@@ -15,41 +15,70 @@ interface MerkleDistributorInfo {
       index: number
       amount: string
       proof: string[]
+      flags?: {
+        [flag: string]: boolean
+      }
     }
   }
 }
 
-export function parseBalanceMap(balanceMap: { [account: string]: string }): MerkleDistributorInfo {
-  const mapped = Object.keys(balanceMap).reduce<{ [address: string]: BigNumber }>((memo, account) => {
+type OldFormat = { [account: string]: number | string }
+type NewFormat = { address: string; earnings: string; reasons: string }
+
+export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistributorInfo {
+  // if balances are in an old format, process them
+  const balancesInNewFormat: NewFormat[] = Array.isArray(balances)
+    ? balances
+    : Object.keys(balances).map(
+        (account): NewFormat => ({
+          address: account,
+          earnings: `0x${balances[account].toString(16)}`,
+          reasons: '',
+        })
+      )
+
+  const dataByAddress = balancesInNewFormat.reduce<{
+    [address: string]: { amount: BigNumber; flags?: { [flag: string]: boolean } }
+  }>((memo, { address: account, earnings, reasons }) => {
     if (!isAddress(account)) {
       throw new Error(`Found invalid address: ${account}`)
     }
     const parsed = getAddress(account)
     if (memo[parsed]) throw new Error(`Duplicate address: ${parsed}`)
-    const parsedNum = BigNumber.from(balanceMap[account])
+    const parsedNum = BigNumber.from(earnings)
     if (parsedNum.lte(0)) throw new Error(`Invalid amount for account: ${account}`)
-    memo[parsed] = parsedNum
+
+    const flags = {
+      isSOCKS: reasons.includes('socks'),
+      isLP: reasons.includes('lp'),
+      isUser: reasons.includes('user'),
+    }
+
+    memo[parsed] = { amount: parsedNum, ...(reasons === '' ? {} : { flags }) }
     return memo
   }, {})
 
-  const treeElements = Object.keys(mapped).map((account) => ({ account, amount: mapped[account] }))
-
-  const tree = new BalanceTree(treeElements)
-
-  const claims = treeElements.reduce<{ [address: string]: { amount: string; index: number; proof: string[] } }>(
-    (memo, { account, amount }, index) => {
-      memo[account] = {
-        index,
-        amount: mapped[account].toHexString(),
-        proof: tree.getProof(index, account, mapped[account]),
-      }
-      return memo
-    },
-    {}
+  // construct a tree
+  const tree = new BalanceTree(
+    Object.keys(dataByAddress).map((address) => ({ account: address, amount: dataByAddress[address].amount }))
   )
 
-  const tokenTotal: BigNumber = Object.keys(mapped).reduce<BigNumber>(
-    (memo, key) => memo.add(mapped[key]),
+  // generate claims
+  const claims = Object.keys(dataByAddress).reduce<{
+    [address: string]: { amount: string; index: number; proof: string[]; flags?: { [flag: string]: boolean } }
+  }>((memo, address, index) => {
+    const { amount, flags } = dataByAddress[address]
+    memo[address] = {
+      index,
+      amount: amount.toHexString(),
+      proof: tree.getProof(index, address, amount),
+      ...(flags ? { flags } : {}),
+    }
+    return memo
+  }, {})
+
+  const tokenTotal: BigNumber = Object.keys(dataByAddress).reduce<BigNumber>(
+    (memo, key) => memo.add(dataByAddress[key].amount),
     BigNumber.from(0)
   )
 
