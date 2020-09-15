@@ -1,7 +1,8 @@
-import { keccak256, keccakFromString, bufferToHex } from 'ethereumjs-util'
+import { bufferToHex, keccak256 } from 'ethereumjs-util'
 
 export default class MerkleTree {
   private readonly elements: Buffer[]
+  private readonly bufferElementPositionIndex: { [hexElement: string]: number }
   private readonly layers: Buffer[][]
 
   constructor(elements: Buffer[]) {
@@ -9,7 +10,12 @@ export default class MerkleTree {
     // Sort elements
     this.elements.sort(Buffer.compare)
     // Deduplicate elements
-    this.elements = this.bufDedup(this.elements)
+    this.elements = MerkleTree.bufDedup(this.elements)
+
+    this.bufferElementPositionIndex = this.elements.reduce<{ [hexElement: string]: number }>((memo, el, index) => {
+      memo[bufferToHex(el)] = index
+      return memo
+    }, {})
 
     // Create layers
     this.layers = this.getLayers(this.elements)
@@ -62,14 +68,14 @@ export default class MerkleTree {
   }
 
   getProof(el: Buffer) {
-    let idx = this.bufIndexOf(el, this.elements)
+    let idx = this.bufferElementPositionIndex[bufferToHex(el)]
 
-    if (idx === -1) {
+    if (typeof idx !== 'number') {
       throw new Error('Element does not exist in Merkle tree')
     }
 
     return this.layers.reduce((proof, layer) => {
-      const pairElement = this.getPairElement(idx, layer)
+      const pairElement = MerkleTree.getPairElement(idx, layer)
 
       if (pairElement) {
         proof.push(pairElement)
@@ -84,10 +90,10 @@ export default class MerkleTree {
   getHexProof(el: Buffer): string[] {
     const proof = this.getProof(el)
 
-    return this.bufArrToHexArr(proof)
+    return MerkleTree.bufArrToHexArr(proof)
   }
 
-  getPairElement(idx: number, layer: Buffer[]): Buffer | null {
+  private static getPairElement(idx: number, layer: Buffer[]): Buffer | null {
     const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1
 
     if (pairIdx < layer.length) {
@@ -97,32 +103,13 @@ export default class MerkleTree {
     }
   }
 
-  bufIndexOf(el: Buffer | string, arr: Buffer[]): number {
-    let hash
-
-    // Convert element to 32 byte hash if it is not one already
-    if (el.length !== 32 || !Buffer.isBuffer(el)) {
-      hash = keccakFromString(el as string)
-    } else {
-      hash = el
-    }
-
-    for (let i = 0; i < arr.length; i++) {
-      if (hash.equals(arr[i])) {
-        return i
-      }
-    }
-
-    return -1
-  }
-
-  bufDedup(elements: Buffer[]): Buffer[] {
+  private static bufDedup(elements: Buffer[]): Buffer[] {
     return elements.filter((el, idx) => {
       return idx === 0 || !elements[idx - 1].equals(el)
     })
   }
 
-  bufArrToHexArr(arr: Buffer[]): string[] {
+  private static bufArrToHexArr(arr: Buffer[]): string[] {
     if (arr.some((el) => !Buffer.isBuffer(el))) {
       throw new Error('Array is not an array of buffers')
     }
@@ -130,7 +117,7 @@ export default class MerkleTree {
     return arr.map((el) => '0x' + el.toString('hex'))
   }
 
-  static sortAndConcat(...args: Buffer[]): Buffer {
+  private static sortAndConcat(...args: Buffer[]): Buffer {
     return Buffer.concat([...args].sort(Buffer.compare))
   }
 }

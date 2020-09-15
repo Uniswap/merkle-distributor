@@ -26,7 +26,7 @@ export default class BalanceTree {
     return pair.equals(root)
   }
 
-  // keccak256(abi.encode(account, amount))
+  // keccak256(abi.encode(index, account, amount))
   public static toNode(index: number | BigNumber, account: string, amount: BigNumber): Buffer {
     return Buffer.from(
       utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount]).substr(2),
