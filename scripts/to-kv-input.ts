@@ -28,7 +28,7 @@ async function main() {
   })
 
   let i = 0
-  while (i <= KV.length - 1) {
+  while (i < KV.length) {
     await axios
       .put(
         `https://api.cloudflare.com/client/v4/accounts/${program.account_identifier}/storage/kv/namespaces/${program.namespace_identifier}/bulk`,
