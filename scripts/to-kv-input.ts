@@ -1,13 +1,16 @@
 import { program } from 'commander'
 import fs from 'fs'
+import axios from 'axios'
+
+const BATCH_SIZE = 10_000
 
 program
   .version('0.0.0')
-  .requiredOption(
-    '-i, --input <path>',
-    'input JSON file location containing a map of account addresses to string balances'
-  )
+  .requiredOption('-i, --input <path>', 'input JSON file location containing a claims tree')
   .requiredOption('-c, --chain-id <number>', 'chain ID of the merkle kv root')
+  .requiredOption('-t, --token <string>', 'Cloudflare API token')
+  .requiredOption('-a, --account-identifier <string>', 'Cloudflare account identifier')
+  .requiredOption('-n, --namespace-identifier <string>', 'Cloudflare KV namespace identifier')
 
 program.parse(process.argv)
 
@@ -15,14 +18,33 @@ const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
-console.log(
-  JSON.stringify(
-    Object.keys(json.claims).map((account) => {
-      const claim = json.claims[account]
-      return {
-        key: `${program.chainId}:${account}`,
-        value: JSON.stringify(claim),
-      }
-    })
-  )
-)
+async function main() {
+  const KV = Object.keys(json.claims).map((account) => {
+    const claim = json.claims[account]
+    return {
+      key: `${program.chainId}:${account}`,
+      value: JSON.stringify(claim),
+    }
+  })
+
+  let i = 0
+  while (i <= KV.length - 1) {
+    await axios
+      .put(
+        `https://api.cloudflare.com/client/v4/accounts/${program.account_identifier}/storage/kv/namespaces/${program.namespace_identifier}/bulk`,
+        JSON.stringify(KV.slice(i, (i += BATCH_SIZE))),
+        {
+          headers: { Authorization: `Bearer ${program.token}`, 'Content-Type': 'application/json' },
+        }
+      )
+      .then((response) => {
+        if (!response.data.success) {
+          throw Error(response.data.errors)
+        }
+      })
+
+    console.log(`Uploaded ${i} records in total`)
+  }
+}
+
+main()
