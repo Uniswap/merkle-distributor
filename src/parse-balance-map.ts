@@ -58,13 +58,15 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     return memo
   }, {})
 
+  const sortedAddresses = Object.keys(dataByAddress).sort()
+
   // construct a tree
   const tree = new BalanceTree(
-    Object.keys(dataByAddress).map((address) => ({ account: address, amount: dataByAddress[address].amount }))
+    sortedAddresses.map((address) => ({ account: address, amount: dataByAddress[address].amount }))
   )
 
   // generate claims
-  const claims = Object.keys(dataByAddress).reduce<{
+  const claims = sortedAddresses.reduce<{
     [address: string]: { amount: string; index: number; proof: string[]; flags?: { [flag: string]: boolean } }
   }>((memo, address, index) => {
     const { amount, flags } = dataByAddress[address]
@@ -77,7 +79,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     return memo
   }, {})
 
-  const tokenTotal: BigNumber = Object.keys(dataByAddress).reduce<BigNumber>(
+  const tokenTotal: BigNumber = sortedAddresses.reduce<BigNumber>(
     (memo, key) => memo.add(dataByAddress[key].amount),
     BigNumber.from(0)
   )
