@@ -324,9 +324,9 @@ describe('MerkleDistributor', () => {
     }
     beforeEach('deploy', async () => {
       const { claims: innerClaims, merkleRoot, tokenTotal } = parseBalanceMap({
-        [wallet0.address]: '200',
-        [wallet1.address]: '300',
-        [wallets[2].address]: '250',
+        [wallet0.address]: 200,
+        [wallet1.address]: 300,
+        [wallets[2].address]: 250,
       })
       expect(tokenTotal).to.eq('0x02ee') // 750
       claims = innerClaims

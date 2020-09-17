@@ -31,9 +31,10 @@ async function main() {
   while (i < KV.length) {
     await axios
       .put(
-        `https://api.cloudflare.com/client/v4/accounts/${program.account_identifier}/storage/kv/namespaces/${program.namespace_identifier}/bulk`,
+        `https://api.cloudflare.com/client/v4/accounts/${program.accountIdentifier}/storage/kv/namespaces/${program.namespaceIdentifier}/bulk`,
         JSON.stringify(KV.slice(i, (i += BATCH_SIZE))),
         {
+          maxBodyLength: Infinity,
           headers: { Authorization: `Bearer ${program.token}`, 'Content-Type': 'application/json' },
         }
       )
