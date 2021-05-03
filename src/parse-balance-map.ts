@@ -46,7 +46,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     const parsed = getAddress(account)
     if (memo[parsed]) throw new Error(`Duplicate address: ${parsed}`)
     const parsedNum = BigNumber.from(earnings)
-    if (parsedNum.lte(0)) throw new Error(`Invalid amount for account: ${account}`)
+    if (parsedNum.lt(0)) throw new Error(`Invalid amount for account: ${account}`)
 
     const flags = {
       isSOCKS: reasons.includes('socks'),
