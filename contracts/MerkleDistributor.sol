@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
-import "./IMerkleDistributor.sol";
+import "./interfaces/IMerkleDistributor.sol";
 
 contract MerkleDistributor is IMerkleDistributor, Ownable {
     address public immutable override token;
@@ -12,7 +12,7 @@ contract MerkleDistributor is IMerkleDistributor, Ownable {
 
     mapping(address => bool) private whitelist;
 
-    constructor(address token_, bytes32 merkleRoot_) public {
+    constructor(address token_, bytes32 merkleRoot_) {
         token = token_;
         merkleRoot = merkleRoot_;
     }
@@ -25,12 +25,14 @@ contract MerkleDistributor is IMerkleDistributor, Ownable {
         whitelist[_address] = true;
     }
     
-    function addToWhitelist(address _address) onlyOwner external override {
-        setWhitelisted(_address);
+    function toggleAddress(address _addr) onlyOwner external override {
+        whitelist[_addr] = !whitelist[_addr];
     }
     
-    function removeFromWhitelist(address _address) onlyOwner external override {
-        whitelist[_address] = false;
+    function toggleAddresses(address[] memory addrs) onlyOwner external override {
+        for(uint i = 0; i < addrs.length; i++){
+            whitelist[addrs[i]] = !whitelist[addrs[i]];
+        }
     }
     
     function pullOutFunds() onlyOwner external override {

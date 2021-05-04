@@ -6,8 +6,8 @@ interface IMerkleDistributor {
     function token() external view returns (address);
     function merkleRoot() external view returns (bytes32);
     function isWhitelisted(address _address) external view returns (bool);
-    function addToWhitelist(address _address) external;
-    function removeFromWhitelist(address _address) external;
+    function toggleAddress(address _addr) external;
+    function toggleAddresses(address[] memory addrs) external;
     function pullOutFunds() external;
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external;
