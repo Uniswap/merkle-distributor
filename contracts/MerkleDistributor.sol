@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
-import "./interfaces/IMerkleDistributor.sol";
+import "./IMerkleDistributor.sol";
 
 contract MerkleDistributor is IMerkleDistributor, Ownable {
     address public immutable override token;
@@ -31,6 +31,11 @@ contract MerkleDistributor is IMerkleDistributor, Ownable {
     
     function removeFromWhitelist(address _address) onlyOwner external override {
         whitelist[_address] = false;
+    }
+    
+    function pullOutFunds() onlyOwner external override {
+        uint256 bal = IERC20(token).balanceOf(address(this));
+        IERC20(token).transfer(msg.sender, bal);
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
