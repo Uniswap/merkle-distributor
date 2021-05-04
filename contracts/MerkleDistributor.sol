@@ -1,45 +1,47 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.6.11;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 import "./interfaces/IMerkleDistributor.sol";
 
-contract MerkleDistributor is IMerkleDistributor {
+contract MerkleDistributor is IMerkleDistributor, Ownable {
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
 
-    // This is a packed array of booleans.
-    mapping(uint256 => uint256) private claimedBitMap;
+    mapping(address => bool) private whitelist;
 
     constructor(address token_, bytes32 merkleRoot_) public {
         token = token_;
         merkleRoot = merkleRoot_;
     }
 
-    function isClaimed(uint256 index) public view override returns (bool) {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        uint256 claimedWord = claimedBitMap[claimedWordIndex];
-        uint256 mask = (1 << claimedBitIndex);
-        return claimedWord & mask == mask;
+    function isWhitelisted(address _address) public view override returns (bool) {
+        return whitelist[_address];
     }
 
-    function _setClaimed(uint256 index) private {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
-        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
+    function setWhitelisted(address _address) private {
+        whitelist[_address] = true;
+    }
+    
+    function addToWhitelist(address _address) onlyOwner external override {
+        setWhitelisted(_address);
+    }
+    
+    function removeFromWhitelist(address _address) onlyOwner external override {
+        whitelist[_address] = false;
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
-        require(!isClaimed(index), 'MerkleDistributor: Drop already claimed.');
+        require(!isWhitelisted(account), 'MerkleDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
         require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
 
         // Mark it claimed and send the token.
-        _setClaimed(index);
+        setWhitelisted(account);
         require(IERC20(token).transfer(account, amount), 'MerkleDistributor: Transfer failed.');
 
         emit Claimed(index, account, amount);
