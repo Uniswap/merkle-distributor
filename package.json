@@ -21,7 +21,7 @@
     "node": ">=10"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "3.1.0",
+    "@openzeppelin/contracts": "4.1.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "axios": "^0.20.0",
