@@ -100,7 +100,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
             rewards[msg.sender] = 0;
             console.log("Reward" , reward);
             console.log("Reward Balance", rewardsToken.balanceOf(address(this)));
-            rewardsToken.safeTransferFrom(address(this), msg.sender, 1);
+            rewardsToken.safeTransferFrom(address(this), msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
