@@ -1,4 +1,6 @@
 require("@nomiclabs/hardhat-ethers");
+require("hardhat-tracer");
+
 
 /**
  * @type import('hardhat/config').HardhatUserConfig

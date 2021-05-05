@@ -16,9 +16,9 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     IERC20 public rewardsToken;
     IERC20 public stakingToken;
-    uint256 public periodFinish = 1620182338 + 100000;
+    uint256 public periodFinish = 1620182338 + 45528; //block number when period ends
     uint256 public rewardRate = 0;
-    uint256 public rewardsDuration = 30 seconds;
+    uint256 public rewardsDuration = 7 days;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
 
@@ -69,7 +69,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }
 
     function earned(address account) override public view returns (uint256) {
-        return _balances[account] * ((rewardPerToken() - userRewardPerTokenPaid[account])/1e18 ) + rewards[account];
+        return _balances[account] * ((rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
     }
 
     function getRewardForDuration() override external view returns (uint256) {
@@ -100,7 +100,8 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
             rewards[msg.sender] = 0;
             console.log("Reward" , reward);
             console.log("Reward Balance", rewardsToken.balanceOf(address(this)));
-            rewardsToken.safeTransferFrom(address(this), msg.sender, reward);
+            rewardsToken.transfer(msg.sender, reward);
+            // rewardsToken.safeTransferFrom(address(this), msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -120,12 +121,14 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
             uint256 leftover = remaining * rewardRate;
             rewardRate = (reward + leftover) / rewardsDuration;
         }
+        console.log("rewardRate", rewardRate);
 
         // Ensure the provided reward amount is not more than the balance in the contract.
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
         uint balance = rewardsToken.balanceOf(address(this));
+        console.log(rewardRate, balance, rewardsDuration);
         require(rewardRate <= balance / rewardsDuration, "Provided reward too high");
 
         lastUpdateTime = block.timestamp;

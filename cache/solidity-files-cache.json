@@ -213,8 +213,8 @@
       ]
     },
     "C:\\Users\\alber\\Desktop\\RiskHarbor-TicketAndAllowlist\\contracts\\Ticket.sol": {
-      "lastModificationDate": 1620150535568,
-      "contentHash": "4bade06e4c915ff43349fadd7edd958c",
+      "lastModificationDate": 1620193588685,
+      "contentHash": "0dc5ffeee618405ce0675a8afec9af92",
       "sourceName": "contracts/Ticket.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -433,8 +433,8 @@
       ]
     },
     "C:\\Users\\alber\\Desktop\\RiskHarbor-TicketAndAllowlist\\contracts\\StakingRewards.sol": {
-      "lastModificationDate": 1620184012502,
-      "contentHash": "d27287a97566e21f252fcf577d5af1b8",
+      "lastModificationDate": 1620194236204,
+      "contentHash": "892f8b411f9311b79bb49bb4f204f880",
       "sourceName": "contracts/StakingRewards.sol",
       "solcConfig": {
         "version": "0.8.0",
