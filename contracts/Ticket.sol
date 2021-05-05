@@ -10,7 +10,7 @@ contract Ticket is ERC20, ERC20Burnable, Ownable {
         whitelist[msg.sender] = true;
         whitelist[address(0)] = true;
         whitelist[address(this)] = true;
-        _mint(msg.sender, 10000000);
+        _mint(msg.sender, 150000*1e18);
     }
 
     function mint(uint256 _amount) onlyOwner external {

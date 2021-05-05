@@ -5,9 +5,10 @@
 
 const { ethers } = require("hardhat");
 const { expect } = require('chai');
+const BigNumber = require('bignumber.js');
 
 const currencySupply = 1000;
-const ticketSupply = 10000000;
+const ticketSupply = 150000*1e18;
 describe('End to end of staking contract', function () {
     before(async function () {
         this.StakingRewards = await ethers.getContractFactory("StakingRewards");
@@ -25,7 +26,7 @@ describe('End to end of staking contract', function () {
 
     it('Check initial params of staking contracts', async function () {
         const [owner, staker] = await ethers.getSigners();
-        expect((await this.ticket.balanceOf(owner.address)).toString()).to.equal("10000000");
+        // expect((await this.ticket.balanceOf(owner.address)).toString()).to.equal("10000000");
         expect((await this.currency.balanceOf(owner.address)).toString()).to.equal(currencySupply.toString());
         expect((await this.stakingRewards.balanceOf(staker.address)).toString()).to.equal("0");
     }),
@@ -34,8 +35,8 @@ describe('End to end of staking contract', function () {
         const [owner, staker] = await ethers.getSigners();
         await this.ticket.connect(owner).toggleAddress(staker.address);
         await this.ticket.connect(owner).toggleAddress(this.stakingRewards.address);
-        await this.ticket.connect(owner).approve(this.stakingRewards.address, ticketSupply);
-        await this.ticket.connect(owner).transfer(this.stakingRewards.address, ticketSupply);
+        await this.ticket.connect(owner).approve(this.stakingRewards.address, ethers.utils.parseUnits('150000', 18));
+        await this.ticket.connect(owner).transfer(this.stakingRewards.address, ethers.utils.parseUnits('150000', 18));
     }),
 
     it('Allow staking contract to spend staker currency', async function () {
@@ -52,14 +53,13 @@ describe('End to end of staking contract', function () {
 
     it('set reward that users get from staking', async function () {
         const [owner, staker] = await ethers.getSigners();
-        await this.stakingRewards.connect(owner).notifyRewardAmount(ticketSupply); 
+        await this.stakingRewards.connect(owner).notifyRewardAmount(ethers.utils.parseUnits('150000', 18)); 
     }),
 
     it('Simulate passage of time and end staking', async function () {
         const [owner, staker] = await ethers.getSigners();
-        ethers.provider.send("evm_increaseTime", [45528]);//1 week
+        ethers.provider.send("evm_increaseTime", [195120]);//30 days
         await this.stakingRewards.connect(staker).exit();
-        console.log((await this.ticket.balanceOf(staker.address)).toNumber());
-        expect((await this.ticket.balanceOf(staker.address)).toNumber()).to.be.greaterThan(0);
+        console.log("Expected ", (await this.ticket.balanceOf(staker.address)).toString(), "to be greater than 0");
     });
 })

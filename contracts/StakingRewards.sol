@@ -16,9 +16,9 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     IERC20 public rewardsToken;
     IERC20 public stakingToken;
-    uint256 public periodFinish = 1620182338 + 45528; //block number when period ends
+    uint256 public periodFinish = 1620182338 + 195120; //block number when period ends
     uint256 public rewardRate = 0;
-    uint256 public rewardsDuration = 7 days;
+    uint256 public rewardsDuration = 30 days;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
 
