@@ -4,7 +4,7 @@ pragma solidity 0.8.0;
 import "./Owned.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/pausable
-contract Pausable is Owned {
+abstract contract Pausable is Owned {
     uint public lastPauseTime;
     bool public paused;
 
@@ -29,7 +29,7 @@ contract Pausable is Owned {
 
         // If applicable, set the last pause time.
         if (paused) {
-            lastPauseTime = now;
+            lastPauseTime = block.timestamp;
         }
 
         // Let everyone know that our pause state has changed.

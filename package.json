@@ -46,6 +46,8 @@
     "prepublishOnly": "yarn test"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0"
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@openzeppelin/contracts": "^4.1.0",
+    "ethers": "^5.1.4"
   }
 }
