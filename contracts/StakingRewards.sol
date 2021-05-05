@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./StakingHelpers/IStakingRewards.sol";
 import "./StakingHelpers/RewardsDistributionRecipient.sol";
 import "./StakingHelpers/Pausable.sol";
-
+import "hardhat/console.sol";
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
 contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -16,9 +16,9 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
 
     IERC20 public rewardsToken;
     IERC20 public stakingToken;
-    uint256 public periodFinish = 0;
+    uint256 public periodFinish = 1620182338 + 100000;
     uint256 public rewardRate = 0;
-    uint256 public rewardsDuration = 7 days;
+    uint256 public rewardsDuration = 30 seconds;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
 
@@ -69,7 +69,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }
 
     function earned(address account) override public view returns (uint256) {
-        return _balances[account] * ((rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
+        return _balances[account] * ((rewardPerToken() - userRewardPerTokenPaid[account])/1e18 ) + rewards[account];
     }
 
     function getRewardForDuration() override external view returns (uint256) {
@@ -98,7 +98,9 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
+            console.log("Reward" , reward);
+            console.log("Reward Balance", rewardsToken.balanceOf(address(this)));
+            rewardsToken.safeTransferFrom(address(this), msg.sender, 1);
             emit RewardPaid(msg.sender, reward);
         }
     }
