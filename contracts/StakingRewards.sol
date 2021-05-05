@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./StakingHelpers/IStakingRewards.sol";
 import "./StakingHelpers/RewardsDistributionRecipient.sol";
 import "./StakingHelpers/Pausable.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
 contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -98,8 +98,6 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            console.log("Reward" , reward);
-            console.log("Reward Balance", rewardsToken.balanceOf(address(this)));
             rewardsToken.transfer(msg.sender, reward);
             // rewardsToken.safeTransferFrom(address(this), msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
@@ -121,14 +119,12 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
             uint256 leftover = remaining * rewardRate;
             rewardRate = (reward + leftover) / rewardsDuration;
         }
-        console.log("rewardRate", rewardRate);
 
         // Ensure the provided reward amount is not more than the balance in the contract.
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
         uint balance = rewardsToken.balanceOf(address(this));
-        console.log(rewardRate, balance, rewardsDuration);
         require(rewardRate <= balance / rewardsDuration, "Provided reward too high");
 
         lastUpdateTime = block.timestamp;

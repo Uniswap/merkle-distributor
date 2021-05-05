@@ -433,8 +433,8 @@
       ]
     },
     "C:\\Users\\alber\\Desktop\\RiskHarbor-TicketAndAllowlist\\contracts\\StakingRewards.sol": {
-      "lastModificationDate": 1620194936290,
-      "contentHash": "f5be07b899a534cb8e2b763d06db8918",
+      "lastModificationDate": 1620200016074,
+      "contentHash": "94d7fc8114bcb6ae84000d6d9167ffb7",
       "sourceName": "contracts/StakingRewards.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -463,8 +463,7 @@
         "@openzeppelin/contracts/security/ReentrancyGuard.sol",
         "./StakingHelpers/IStakingRewards.sol",
         "./StakingHelpers/RewardsDistributionRecipient.sol",
-        "./StakingHelpers/Pausable.sol",
-        "hardhat/console.sol"
+        "./StakingHelpers/Pausable.sol"
       ],
       "versionPragmas": [
         "0.8.0"
