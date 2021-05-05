@@ -1,14 +1,15 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.8.0;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeMath.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+// Inheritance
+import "./StakingHelpers/IStakingRewards.sol";
+import "./StakingHelpers/RewardsDistributionRecipient.sol";
+import "./StakingHelpers/Pausable.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
-contract StakingRewards is RewardsDistributionRecipient {
-    using SafeMath for uint256;
+contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /* ========== STATE VARIABLES ========== */
@@ -20,7 +21,6 @@ contract StakingRewards is RewardsDistributionRecipient {
     uint256 public rewardsDuration = 7 days;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
-    address public rewardsDistribution;
 
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
@@ -51,8 +51,14 @@ contract StakingRewards is RewardsDistributionRecipient {
         return _balances[account];
     }
 
+    //Returns the min(block.timestamp, periodFinish)
     function lastTimeRewardApplicable() public view returns (uint256) {
-        return Math.min(block.timestamp, periodFinish);
+        if (block.timestamp < periodFinish){
+            return block.timestamp;
+        }
+        else{
+            return periodFinish;
+        }
     }
 
     function rewardPerToken() public view returns (uint256) {
@@ -148,10 +154,6 @@ contract StakingRewards is RewardsDistributionRecipient {
         rewardsDuration = _rewardsDuration;
         emit RewardsDurationUpdated(rewardsDuration);
     }
-    
-    function setRewardsDistribution(address _rewardsDistribution) external onlyOwner {
-        rewardsDistribution = _rewardsDistribution;
-    }
 
     /* ========== MODIFIERS ========== */
 
@@ -162,11 +164,6 @@ contract StakingRewards is RewardsDistributionRecipient {
             rewards[account] = earned(account);
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
-        _;
-    }
-    
-    modifier onlyRewardsDistribution() {
-        require(msg.sender == rewardsDistribution, "Caller is not RewardsDistribution contract");
         _;
     }
 
