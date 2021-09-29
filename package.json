@@ -47,5 +47,8 @@
   },
   "resolutions": {
     "ethereum-waffle/ethers": "5.4.7"
+  },
+  "dependencies": {
+    "eth-sig-util": "3.0.1"
   }
 }

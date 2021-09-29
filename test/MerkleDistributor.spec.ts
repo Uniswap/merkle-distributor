@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai'
 import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
 import { Contract, BigNumber, utils, constants } from 'ethers'
+import * as ethSigUtil from 'eth-sig-util'
 
 import BalanceTree from '../src/balance-tree'
 import Distributor from '../build/MerkleDistributor.json'
@@ -364,7 +365,97 @@ describe('MerkleDistributor', () => {
         expect(await token.delegates(wallet0.address)).to.be.equal(wallet0.address);
       })
 
+      it('successful self delegation by signature after claim', async () => {
 
+        // Not delegated
+        expect(await token.delegates(wallet0.address)).to.be.equal(constants.AddressZero);
+        const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
+
+        // claim
+        await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides))
+          .to.emit(distributor, 'Claimed')
+          .withArgs(0, wallet0.address, 100)
+
+        // check balance
+        expect (await token.balanceOf(wallet0.address)).to.eq(100)
+
+        // Still not delegated
+        expect(await token.delegates(wallet0.address)).to.be.equal(constants.AddressZero);
+
+        const delegatee = wallet0.address
+
+        // Prep sign
+        const nonce = 0
+        const expiry = Math.floor(new Date().getTime()/1000) + 60 * 60 // 1 hour from now!
+        // const { chainId } = await provider.getNetwork()
+        const chainId = 1 // Ganache things its #1. 🤦‍♂️
+        const domain = {
+          name: await token.name(),
+          version,
+          chainId,
+          verifyingContract: token.address,
+        }
+
+        const types = {
+          'Delegation': [
+            { name: 'delegatee', type: 'address' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'expiry', type: 'uint256' },
+          ]
+        }
+
+        const value = {
+          delegatee,
+          nonce,
+          expiry,
+        }
+
+        // Sign with ethers
+        const ethersSignature = await wallet0._signTypedData(domain, types, value)
+        expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
+
+
+        // Sign with eth-sig-utils
+        const sigUtilsSignature = ethSigUtil.signTypedMessage(
+          Buffer.from(utils.arrayify(wallet0.privateKey)),
+          {
+            data: {
+              primaryType: 'Delegation',
+              types: {
+                EIP712Domain: [
+                  { name: 'name', type: 'string' },
+                  { name: 'version', type: 'string' },
+                  { name: 'chainId', type: 'uint256' },
+                  { name: 'verifyingContract', type: 'address' },
+                ],
+                ...types
+              },
+              domain,
+              message: {
+                delegatee,
+                nonce,
+                expiry,
+              },
+            },
+          },
+        );
+        const signer = utils.verifyTypedData(domain, types, value, ethersSignature)
+        expect(utils.verifyTypedData(domain, types, value, sigUtilsSignature)).to.equal(wallet0.address)
+
+        // Sanity check! So Why the hell do we get a different mechanism in the EVM!
+        expect(ethersSignature).to.equal(sigUtilsSignature)
+
+        // Format signature
+        const { v, r, s } = utils.splitSignature(sigUtilsSignature)
+
+        await expect(token.delegateBySig(delegatee, nonce, expiry, v, r, s))
+          .to.emit(token, 'DelegateChanged')
+          .withArgs(wallet0.address, constants.AddressZero, wallet0.address)
+          .to.emit(token, 'DelegateVotesChanged')
+          .withArgs(wallet0.address, BigNumber.from(0), BigNumber.from(100))
+
+        expect(await token.delegates(wallet0.address)).to.be.equal(wallet0.address);
+      })
     })
 
   })
