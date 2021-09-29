@@ -44,5 +44,8 @@
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
     "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test"
+  },
+  "resolutions": {
+    "ethereum-waffle/ethers": "5.4.7"
   }
 }
