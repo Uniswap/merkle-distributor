@@ -45,4 +45,13 @@ contract MerkleDistributor is IMerkleDistributor {
 
         emit Claimed(index, account, amount);
     }
+
+    function delegateToClaim(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s, uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+
+        // Claim
+        this.claim(index, account, amount, merkleProof);
+
+        // Delegate
+        ERC20Votes(token).delegateBySig(delegatee, nonce, expiry, v, r, s);
+    }
 }

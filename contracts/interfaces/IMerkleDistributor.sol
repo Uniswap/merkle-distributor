@@ -11,6 +11,8 @@ interface IMerkleDistributor {
     function isClaimed(uint256 index) external view returns (bool);
     // Claim the given amount of the token to the given address. Reverts if the inputs are invalid.
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external;
+    // Claim the given amount of the token to the given address and then delegates the votes. Reverts if the inputs are invalid.
+    function delegateToClaim(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s, uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external;
 
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(uint256 index, address account, uint256 amount);

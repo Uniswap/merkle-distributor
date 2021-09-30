@@ -176,7 +176,7 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(0, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(81128)
+        expect(receipt.gasUsed).to.eq(81218)
       })
     })
 
@@ -211,7 +211,7 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(9, wallets[9].address, BigNumber.from(10))
         const tx = await distributor.claim(9, wallets[9].address, 10, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(83907)
+        expect(receipt.gasUsed).to.eq(83997)
       })
 
       it('gas second down about 15k', async () => {
@@ -230,7 +230,7 @@ describe('MerkleDistributor', () => {
           overrides
         )
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(68887)
+        expect(receipt.gasUsed).to.eq(68977)
       })
     })
 
@@ -266,14 +266,14 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(50000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(95832)
+        expect(receipt.gasUsed).to.eq(95922)
       })
 
       it('gas deeper node', async () => {
         const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(90000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(95768)
+        expect(receipt.gasUsed).to.eq(95858)
       })
 
       it('gas average random distribution', async () => {
@@ -287,7 +287,7 @@ describe('MerkleDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(81238)
+        expect(average).to.eq(81328)
       })
 
       // this is what we gas golfed by packing the bitmap
@@ -302,7 +302,7 @@ describe('MerkleDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(67006)
+        expect(average).to.eq(67096)
       })
 
       it('no double claims in random distribution', async () => {
@@ -459,6 +459,180 @@ describe('MerkleDistributor', () => {
     })
 
   })
+
+  describe('#delegateToClaim', () => {
+
+      let distributor: Contract
+      let tree: BalanceTree
+
+      beforeEach('deploy', async () => {
+        tree = new BalanceTree([
+          { account: wallet0.address, amount: BigNumber.from(100) },
+          { account: wallet1.address, amount: BigNumber.from(101) },
+        ])
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        await token.setBalance(distributor.address, 201)
+      })
+
+      it('successful claim and delegate to self', async () => {
+
+        // Not delegated
+        expect(await token.delegates(wallet0.address)).to.be.equal(constants.AddressZero);
+
+        // Create Proof
+        const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
+        const version = '1';
+
+        const delegatee = wallet0.address
+
+        // Prep sign
+        const nonce = 0
+        const expiry = Math.floor(new Date().getTime()/1000) + 60 * 60 // 1 hour from now!
+        // const { chainId } = await provider.getNetwork()
+        const chainId = 1 // Ganache things its #1. 🤦‍♂️
+        const domain = {
+          name: await token.name(),
+          version,
+          chainId,
+          verifyingContract: token.address,
+        }
+
+        const types = {
+          'Delegation': [
+            { name: 'delegatee', type: 'address' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'expiry', type: 'uint256' },
+          ]
+        }
+
+        const value = {
+          delegatee,
+          nonce,
+          expiry,
+        }
+
+        // Sign with ethers
+        const ethersSignature = await wallet0._signTypedData(domain, types, value)
+        expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
+
+        // Format signature
+        const { v, r, s } = utils.splitSignature(ethersSignature)
+
+        await expect(distributor.delegateToClaim(delegatee, nonce, expiry, v, r, s, 0, wallet0.address, 100, proof0, overrides))
+          .to.emit(distributor, 'Claimed')
+          .withArgs(0, wallet0.address, 100)
+          .to.emit(token, 'DelegateChanged')
+          .withArgs(wallet0.address, constants.AddressZero, wallet0.address)
+          .to.emit(token, 'DelegateVotesChanged')
+          .withArgs(wallet0.address, BigNumber.from(0), BigNumber.from(100))
+
+          expect(await token.delegates(wallet0.address)).to.be.equal(wallet0.address);
+          expect(await token.balanceOf(wallet0.address)).to.be.equal(100);
+      })
+
+      it('successful claim and delegate to someone else', async () => {
+
+        // Not delegated
+        expect(await token.delegates(wallet0.address)).to.be.equal(constants.AddressZero);
+
+        // Create Proof
+        const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
+        const version = '1';
+
+        const delegatee = wallet1.address
+
+        // Prep sign
+        const nonce = 0
+        const expiry = Math.floor(new Date().getTime()/1000) + 60 * 60 // 1 hour from now!
+        // const { chainId } = await provider.getNetwork()
+        const chainId = 1 // Ganache things its #1. 🤦‍♂️
+        const domain = {
+          name: await token.name(),
+          version,
+          chainId,
+          verifyingContract: token.address,
+        }
+
+        const types = {
+          'Delegation': [
+            { name: 'delegatee', type: 'address' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'expiry', type: 'uint256' },
+          ]
+        }
+
+        const value = {
+          delegatee,
+          nonce,
+          expiry,
+        }
+
+        // Sign with ethers
+        const ethersSignature = await wallet0._signTypedData(domain, types, value)
+        expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
+
+        // Format signature
+        const { v, r, s } = utils.splitSignature(ethersSignature)
+
+        await expect(distributor.delegateToClaim(delegatee, nonce, expiry, v, r, s, 0, wallet0.address, 100, proof0, overrides))
+          .to.emit(distributor, 'Claimed')
+          .withArgs(0, wallet0.address, 100)
+          .to.emit(token, 'DelegateChanged')
+          .withArgs(wallet0.address, constants.AddressZero, wallet1.address)
+          .to.emit(token, 'DelegateVotesChanged')
+          .withArgs(wallet1.address, BigNumber.from(0), BigNumber.from(100))
+
+          expect(await token.delegates(wallet0.address)).to.be.equal(wallet1.address);
+          expect(await token.delegates(wallet1.address)).to.be.equal(constants.AddressZero);
+          expect(await token.balanceOf(wallet0.address)).to.be.equal(100);
+          expect(await token.balanceOf(wallet1.address)).to.be.equal(0);
+      })
+
+      it('gas', async () => {
+        const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
+
+        const delegatee = wallet0.address
+
+        // Prep sign
+        const version = '1';
+        const nonce = 0
+        const expiry = Math.floor(new Date().getTime()/1000) + 60 * 60 // 1 hour from now!
+        // const { chainId } = await provider.getNetwork()
+        const chainId = 1 // Ganache things its #1. 🤦‍♂️
+        const domain = {
+          name: await token.name(),
+          version,
+          chainId,
+          verifyingContract: token.address,
+        }
+
+        const types = {
+          'Delegation': [
+            { name: 'delegatee', type: 'address' },
+            { name: 'nonce', type: 'uint256' },
+            { name: 'expiry', type: 'uint256' },
+          ]
+        }
+
+        const value = {
+          delegatee,
+          nonce,
+          expiry,
+        }
+
+        // Sign with ethers
+        const ethersSignature = await wallet0._signTypedData(domain, types, value)
+        expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
+
+        // Format signature
+        const { v, r, s } = utils.splitSignature(ethersSignature)
+
+        const tx = await distributor.delegateToClaim(delegatee, nonce, expiry, v, r, s, 0, wallet0.address, 100, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(184757)
+      })
+  })
+
 
   describe('parseBalanceMap', () => {
     let distributor: Contract
