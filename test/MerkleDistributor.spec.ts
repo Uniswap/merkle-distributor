@@ -1,7 +1,6 @@
 import chai, { expect } from 'chai'
 import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
 import { Contract, BigNumber, utils, constants } from 'ethers'
-import * as ethSigUtil from 'eth-sig-util'
 
 import BalanceTree from '../src/balance-tree'
 import Distributor from '../build/MerkleDistributor.json'
@@ -415,38 +414,11 @@ describe('MerkleDistributor', () => {
         expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
 
 
-        // Sign with eth-sig-utils
-        const sigUtilsSignature = ethSigUtil.signTypedMessage(
-          Buffer.from(utils.arrayify(wallet0.privateKey)),
-          {
-            data: {
-              primaryType: 'Delegation',
-              types: {
-                EIP712Domain: [
-                  { name: 'name', type: 'string' },
-                  { name: 'version', type: 'string' },
-                  { name: 'chainId', type: 'uint256' },
-                  { name: 'verifyingContract', type: 'address' },
-                ],
-                ...types
-              },
-              domain,
-              message: {
-                delegatee,
-                nonce,
-                expiry,
-              },
-            },
-          },
-        );
         const signer = utils.verifyTypedData(domain, types, value, ethersSignature)
-        expect(utils.verifyTypedData(domain, types, value, sigUtilsSignature)).to.equal(wallet0.address)
-
-        // Sanity check! So Why the hell do we get a different mechanism in the EVM!
-        expect(ethersSignature).to.equal(sigUtilsSignature)
+        expect(utils.verifyTypedData(domain, types, value, ethersSignature)).to.equal(wallet0.address)
 
         // Format signature
-        const { v, r, s } = utils.splitSignature(sigUtilsSignature)
+        const { v, r, s } = utils.splitSignature(ethersSignature)
 
         await expect(token.delegateBySig(delegatee, nonce, expiry, v, r, s))
           .to.emit(token, 'DelegateChanged')
