@@ -9,13 +9,19 @@ import "./interfaces/IMerkleDistributor.sol";
 contract MerkleDistributor is IMerkleDistributor {
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
+    uint256 public immutable override maxBlocks;
+    uint256 public immutable override startingBlock;
+    address public immutable override collector;
 
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address token_, bytes32 merkleRoot_)  {
+    constructor(address token_, bytes32 merkleRoot_, uint256 maxBlocks_, address collector_)  {
         token = token_;
         merkleRoot = merkleRoot_;
+        maxBlocks = maxBlocks_;
+        collector = collector_;
+        startingBlock = block.number;
     }
 
     function isClaimed(uint256 index) public view override returns (bool) {
@@ -53,5 +59,14 @@ contract MerkleDistributor is IMerkleDistributor {
 
         // Delegate
         ERC20Votes(token).delegateBySig(delegatee, nonce, expiry, v, r, s);
+    }
+
+    // Cleanup function anyone can call it after 1,000,000 blocks to send all remaining tokens to the collector
+    // All claims will fail after that since the contract will not have tokens left.
+    // Not using selfdestruct as it is considered harmful
+    function sweep() external override {
+        require(block.number > startingBlock + maxBlocks, "Drop has not ended yet");
+        uint256 amount = IERC20(token).balanceOf(address(this));
+        IERC20(token).transfer(collector, amount);
     }
 }
