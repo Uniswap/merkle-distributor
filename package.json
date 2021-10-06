@@ -21,20 +21,20 @@
     "node": ">=10"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "3.1.0",
-    "@types/chai": "^4.2.6",
+    "@openzeppelin/contracts": "4.3.2",
+    "@types/chai": "4.2.22",
     "@types/mocha": "^5.2.7",
     "axios": "^0.20.0",
-    "chai": "^4.2.0",
-    "commander": "^6.1.0",
-    "ethereum-waffle": "^3.0.0",
-    "ethereumjs-util": "^7.0.4",
+    "chai": "4.3.4",
+    "commander": "6.2.1",
+    "ethereum-waffle": "3.4.0",
+    "ethereumjs-util": "7.1.1",
     "mocha": "^6.2.2",
-    "prettier": "^2.0.5",
+    "prettier": "2.4.1",
     "rimraf": "^3.0.0",
-    "solc": "0.6.11",
+    "solc": "0.8.0",
     "ts-node": "^8.5.4",
-    "typescript": "^3.7.3"
+    "typescript": "3.9.10"
   },
   "scripts": {
     "precompile": "rimraf ./build/",
@@ -44,5 +44,9 @@
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
     "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test"
-  }
+  },
+  "resolutions": {
+    "ethereum-waffle/ethers": "5.4.7"
+  },
+  "dependencies": {}
 }
