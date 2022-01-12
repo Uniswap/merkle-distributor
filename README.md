@@ -1,20 +1,25 @@
-# @uniswap/merkle-distributor
+# @decentraland/content-hash-merkle-distributor
 
-[![Tests](https://github.com/Uniswap/merkle-distributor/workflows/Tests/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ATests)
-[![Lint](https://github.com/Uniswap/merkle-distributor/workflows/Lint/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ALint)
+## Forked from @uniswap/merkle-distributor
 
-# Local Development
+## Local Development
 
 The following assumes the use of `node@>=10`.
 
-## Install Dependencies
+### Install Dependencies
 
-`yarn`
+`npm ci`
 
-## Compile Contracts
+### Run a tree with ~10k content hashes
 
-`yarn compile`
+`npm run generate-merkle-root:data`
 
-## Run Tests
+Time to completion 1.049s. Json size: 18mb
 
-`yarn test`
+This will generate a `proofs.json` file in the root of the project.
+
+### Verify a single proof of a tree with ~10k leafs
+
+`npm run verify-merkle-root:proof`
+
+Time to completion 9.294ms. Json size: 4kb
