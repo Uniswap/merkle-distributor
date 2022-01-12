@@ -10,7 +10,7 @@ The following assumes the use of `node@>=10`.
 
 `npm ci`
 
-### Run a tree with ~10k content hashes
+### Generate a tree with ~10k content hashes
 
 `npm run generate-merkle-root:data`
 
