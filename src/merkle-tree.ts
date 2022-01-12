@@ -1,4 +1,9 @@
-import { bufferToHex, keccak256 } from 'ethereumjs-util'
+import { utils } from 'ethers'
+const { solidityKeccak256 } = utils
+
+function bufferToHex(buf: Buffer) {
+  return '0x' + buf.toString('hex')
+};
 
 export default class MerkleTree {
   private readonly elements: Buffer[]
@@ -43,7 +48,6 @@ export default class MerkleTree {
         // Hash the current element with its pair element
         layer.push(MerkleTree.combinedHash(el, arr[idx + 1]))
       }
-
       return layer
     }, [])
   }
@@ -56,7 +60,7 @@ export default class MerkleTree {
       return first
     }
 
-    return keccak256(MerkleTree.sortAndConcat(first, second))
+    return Buffer.from(solidityKeccak256(['bytes'], [bufferToHex(MerkleTree.sortAndConcat(first, second))]).substr(2), 'hex')
   }
 
   getRoot(): Buffer {
@@ -76,7 +80,6 @@ export default class MerkleTree {
 
     return this.layers.reduce((proof, layer) => {
       const pairElement = MerkleTree.getPairElement(idx, layer)
-
       if (pairElement) {
         proof.push(pairElement)
       }

@@ -27,7 +27,6 @@
     "chai": "^4.2.0",
     "commander": "^6.1.0",
     "ethereum-waffle": "^3.0.0",
-    "ethereumjs-util": "^7.0.4",
     "mocha": "^6.2.2",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.0",
