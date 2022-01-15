@@ -3,3 +3,4 @@ dist
 package-lock.json
 coverage
 build
+.nyc_output

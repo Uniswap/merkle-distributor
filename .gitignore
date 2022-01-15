@@ -3,3 +3,5 @@ build/
 wrangler.toml
 proofs.json
 dist
+.nyc_output
+lcov.info

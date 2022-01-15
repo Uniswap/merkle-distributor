@@ -47,6 +47,7 @@
     "eslint-config-prettier": "^8.3.0",
     "ethereum-waffle": "^3.0.0",
     "mocha": "^6.2.2",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.0",
     "solc": "0.6.11",
@@ -54,7 +55,7 @@
     "typescript": "^3.7.3"
   },
   "scripts": {
-    "test:coverage": "mocha --coverage",
+    "test:coverage": "nyc mocha && nyc report --reporter=text-lcov > ./lcov.info",
     "build": "npx tsc -p tsconfig.json",
     "check:prettier": "prettier -c './**/*.{js,ts,json,yml,md,tsx}'",
     "check:code": "eslint . --max-warnings=0",
