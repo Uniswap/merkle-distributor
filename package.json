@@ -8,7 +8,16 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Decentraland",
-  "license": "Apache 2.0",
+  "licenses": [
+    {
+      "type": "GPL-3.0 License",
+      "url": "https://opensource.org/licenses/GPL-3.0"
+    },
+    {
+      "type": "Apache 2.0",
+      "url": "https://opensource.org/licenses/apache2.0.php"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/decentraland/content-hash-tree/issues"
   },
@@ -30,8 +39,12 @@
     "@openzeppelin/contracts": "3.1.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
     "chai": "^4.2.0",
     "commander": "^6.1.0",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
     "ethereum-waffle": "^3.0.0",
     "mocha": "^6.2.2",
     "prettier": "^2.0.5",
@@ -41,7 +54,7 @@
     "typescript": "^3.7.3"
   },
   "scripts": {
-    "test:coverage": "jest --coverage",
+    "test:coverage": "mocha --coverage",
     "build": "npx tsc -p tsconfig.json",
     "check:prettier": "prettier -c './**/*.{js,ts,json,yml,md,tsx}'",
     "check:code": "eslint . --max-warnings=0",
