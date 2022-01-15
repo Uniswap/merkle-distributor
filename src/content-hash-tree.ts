@@ -28,7 +28,9 @@ export class ContentHashTree {
   // keccak256(abi.encode(index, contentHash))
   public static toNode(index: number | BigNumber, contentHash: string): Buffer {
     return Buffer.from(
-      utils.solidityKeccak256(['uint256', 'string'], [index, contentHash]).substr(2),
+      utils
+        .solidityKeccak256(['uint256', 'string'], [index, contentHash])
+        .substr(2),
       'hex'
     )
   }

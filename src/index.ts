@@ -11,11 +11,11 @@ export function generateTree(contentHashes: string[]): MerkleDistributorInfo {
 
   // generate proofs
   const proofs = sortedContentHashes.reduce<{
-    [contentHash: string]: { index: number, proof: string[] }
+    [contentHash: string]: { index: number; proof: string[] }
   }>((memo, contentHash, index) => {
     memo[contentHash] = {
       index,
-      proof: tree.getProof(index, contentHash),
+      proof: tree.getProof(index, contentHash)
     }
     return memo
   }, {})
@@ -23,10 +23,15 @@ export function generateTree(contentHashes: string[]): MerkleDistributorInfo {
   return {
     merkleRoot: tree.getHexRoot(),
     total: contentHashes.length,
-    proofs,
+    proofs
   }
 }
 
-export function verifyProof(index: BigNumber | number, contentHash: string, proof: Buffer[], root: Buffer): boolean {
+export function verifyProof(
+  index: BigNumber | number,
+  contentHash: string,
+  proof: Buffer[],
+  root: Buffer
+): boolean {
   return ContentHashTree.verifyProof(index, contentHash, proof, root)
 }

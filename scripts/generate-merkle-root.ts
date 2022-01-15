@@ -11,13 +11,13 @@ program
 
 program.parse(process.argv)
 
-console.time("generate-tree")
+console.time('generate-tree')
 const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
 const tree = generateTree(json)
-console.timeEnd("generate-tree")
+console.timeEnd('generate-tree')
 fs.writeFile('proofs.json', JSON.stringify(tree), (err) => {
   if (err) {
     throw err

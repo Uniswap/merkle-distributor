@@ -23,6 +23,7 @@
   "include": ["src"],
   "exclude": [
     "node_modules",
+    "build",
     "dist",
     "src/test-utils/**/*.ts",
     "src/**/*.spec.ts"

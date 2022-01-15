@@ -25,13 +25,21 @@ const combinedHash = (first: Buffer, second: Buffer): Buffer => {
   }
 
   return Buffer.from(
-    utils.solidityKeccak256(['bytes32', 'bytes32'], [first, second].sort(Buffer.compare)).slice(2),
+    utils
+      .solidityKeccak256(
+        ['bytes32', 'bytes32'],
+        [first, second].sort(Buffer.compare)
+      )
+      .slice(2),
     'hex'
   )
 }
 
 const toNode = (index: number | BigNumber, contentHash: string): Buffer => {
-  const pairHex = utils.solidityKeccak256(['uint256', 'string'], [index, contentHash])
+  const pairHex = utils.solidityKeccak256(
+    ['uint256', 'string'],
+    [index, contentHash]
+  )
   return Buffer.from(pairHex.slice(2), 'hex')
 }
 
@@ -46,7 +54,9 @@ const getNextLayer = (elements: Buffer[]): Buffer[] => {
   }, [])
 }
 
-const getRoot = (contentHashes: { contentHash: string; index: number }[]): Buffer => {
+const getRoot = (
+  contentHashes: { contentHash: string; index: number }[]
+): Buffer => {
   let nodes = contentHashes
     .map(({ contentHash, index }) => toNode(index, contentHash))
     // sort by lexicographical order
@@ -73,7 +83,7 @@ if (typeof json !== 'object') throw new Error('Invalid JSON')
 const merkleRootHex = json.merkleRoot
 const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 
-let contentHashes: { index: number; contentHash: string }[] = []
+const contentHashes: { index: number; contentHash: string }[] = []
 let valid = true
 
 Object.keys(json.claims).forEach((contentHash) => {
@@ -98,4 +108,7 @@ console.timeEnd('validateHash')
 // Root
 const root = getRoot(contentHashes).toString('hex')
 console.log('Reconstructed merkle root', root)
-console.log('Root matches the one read from the JSON?', root === merkleRootHex.slice(2))
+console.log(
+  'Root matches the one read from the JSON?',
+  root === merkleRootHex.slice(2)
+)
