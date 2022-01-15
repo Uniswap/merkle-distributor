@@ -1,7 +1,7 @@
 import MerkleTree from './merkle-tree'
 import { BigNumber, utils } from 'ethers'
 
-export default class ContentHashTree {
+export class ContentHashTree {
   private readonly tree: MerkleTree
   constructor(contentHashes: string[]) {
     this.tree = new MerkleTree(
@@ -28,7 +28,9 @@ export default class ContentHashTree {
   // keccak256(abi.encode(index, contentHash))
   public static toNode(index: number | BigNumber, contentHash: string): Buffer {
     return Buffer.from(
-      utils.solidityKeccak256(['uint256', 'string'], [index, contentHash]).substr(2),
+      utils
+        .solidityKeccak256(['uint256', 'string'], [index, contentHash])
+        .substr(2),
       'hex'
     )
   }

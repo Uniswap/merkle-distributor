@@ -3,7 +3,7 @@ const { solidityKeccak256 } = utils
 
 function bufferToHex(buf: Buffer) {
   return '0x' + buf.toString('hex')
-};
+}
 
 export default class MerkleTree {
   private readonly elements: Buffer[]
@@ -17,7 +17,9 @@ export default class MerkleTree {
     // Deduplicate elements
     this.elements = MerkleTree.bufDedup(this.elements)
 
-    this.bufferElementPositionIndex = this.elements.reduce<{ [hexElement: string]: number }>((memo, el, index) => {
+    this.bufferElementPositionIndex = this.elements.reduce<{
+      [hexElement: string]: number
+    }>((memo, el, index) => {
       memo[bufferToHex(el)] = index
       return memo
     }, {})
@@ -60,7 +62,13 @@ export default class MerkleTree {
       return first
     }
 
-    return Buffer.from(solidityKeccak256(['bytes'], [bufferToHex(MerkleTree.sortAndConcat(first, second))]).substr(2), 'hex')
+    return Buffer.from(
+      solidityKeccak256(
+        ['bytes'],
+        [bufferToHex(MerkleTree.sortAndConcat(first, second))]
+      ).substr(2),
+      'hex'
+    )
   }
 
   getRoot(): Buffer {

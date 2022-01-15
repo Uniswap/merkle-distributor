@@ -2,6 +2,8 @@ import { program } from 'commander'
 import fs from 'fs'
 import { BigNumber, utils } from 'ethers'
 
+import { verifyProof } from '../src/index'
+
 program
   .version('0.0.0')
   .requiredOption(
@@ -10,6 +12,8 @@ program
   )
 
 program.parse(process.argv)
+
+console.time('validateHash')
 const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 const combinedHash = (first: Buffer, second: Buffer): Buffer => {
@@ -21,29 +25,22 @@ const combinedHash = (first: Buffer, second: Buffer): Buffer => {
   }
 
   return Buffer.from(
-    utils.solidityKeccak256(['bytes32', 'bytes32'], [first, second].sort(Buffer.compare)).slice(2),
+    utils
+      .solidityKeccak256(
+        ['bytes32', 'bytes32'],
+        [first, second].sort(Buffer.compare)
+      )
+      .slice(2),
     'hex'
   )
 }
 
-const toNode = (index: number | BigNumber, account: string, amount: BigNumber): Buffer => {
-  const pairHex = utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount])
+const toNode = (index: number | BigNumber, contentHash: string): Buffer => {
+  const pairHex = utils.solidityKeccak256(
+    ['uint256', 'string'],
+    [index, contentHash]
+  )
   return Buffer.from(pairHex.slice(2), 'hex')
-}
-
-const verifyProof = (
-  index: number | BigNumber,
-  account: string,
-  amount: BigNumber,
-  proof: Buffer[],
-  root: Buffer
-): boolean => {
-  let pair = toNode(index, account, amount)
-  for (const item of proof) {
-    pair = combinedHash(pair, item)
-  }
-
-  return pair.equals(root)
 }
 
 const getNextLayer = (elements: Buffer[]): Buffer[] => {
@@ -57,9 +54,11 @@ const getNextLayer = (elements: Buffer[]): Buffer[] => {
   }, [])
 }
 
-const getRoot = (balances: { account: string; amount: BigNumber; index: number }[]): Buffer => {
-  let nodes = balances
-    .map(({ account, amount, index }) => toNode(index, account, amount))
+const getRoot = (
+  contentHashes: { contentHash: string; index: number }[]
+): Buffer => {
+  let nodes = contentHashes
+    .map(({ contentHash, index }) => toNode(index, contentHash))
     // sort by lexicographical order
     .sort(Buffer.compare)
 
@@ -84,17 +83,17 @@ if (typeof json !== 'object') throw new Error('Invalid JSON')
 const merkleRootHex = json.merkleRoot
 const merkleRoot = Buffer.from(merkleRootHex.slice(2), 'hex')
 
-let balances: { index: number; account: string; amount: BigNumber }[] = []
+const contentHashes: { index: number; contentHash: string }[] = []
 let valid = true
 
-Object.keys(json.claims).forEach((address) => {
-  const claim = json.claims[address]
+Object.keys(json.claims).forEach((contentHash) => {
+  const claim = json.claims[contentHash]
   const proof = claim.proof.map((p: string) => Buffer.from(p.slice(2), 'hex'))
-  balances.push({ index: claim.index, account: address, amount: BigNumber.from(claim.amount) })
-  if (verifyProof(claim.index, address, claim.amount, proof, merkleRoot)) {
-    console.log('Verified proof for', claim.index, address)
+  contentHashes.push({ index: claim.index, contentHash: contentHash })
+  if (verifyProof(claim.index, contentHash, proof, merkleRoot)) {
+    console.log('Verified proof for', claim.index, contentHash)
   } else {
-    console.log('Verification for', address, 'failed')
+    console.log('Verification for', contentHash, 'failed')
     valid = false
   }
 })
@@ -104,8 +103,12 @@ if (!valid) {
   process.exit(1)
 }
 console.log('Done!')
+console.timeEnd('validateHash')
 
 // Root
-const root = getRoot(balances).toString('hex')
+const root = getRoot(contentHashes).toString('hex')
 console.log('Reconstructed merkle root', root)
-console.log('Root matches the one read from the JSON?', root === merkleRootHex.slice(2))
+console.log(
+  'Root matches the one read from the JSON?',
+  root === merkleRootHex.slice(2)
+)

@@ -1,33 +1,53 @@
 {
-  "name": "@uniswap/merkle-distributor",
-  "author": {
-    "name": "Moody Salem"
-  },
-  "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
-  "version": "1.0.1",
-  "homepage": "https://uniswap.org",
-  "keywords": [
-    "uniswap",
-    "erc20"
+  "name": "@dcl/content-hash-tree",
+  "description": "Lib to generate and validate a merkle tree of content hashes",
+  "version": "1.0.0",
+  "files": [
+    "dist"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Decentraland",
+  "licenses": [
+    {
+      "type": "GPL-3.0 License",
+      "url": "https://opensource.org/licenses/GPL-3.0"
+    },
+    {
+      "type": "Apache 2.0",
+      "url": "https://opensource.org/licenses/apache2.0.php"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/decentraland/content-hash-tree/issues"
+  },
+  "homepage": "https://github.com/decentraland/content-hash-tree#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/merkle-distributor"
+    "url": "git+https://github.com/decentraland/content-hash-tree.git"
   },
-  "files": [
-    "build"
-  ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14.0.0",
+    "npm": "^6.0.0"
   },
+  "keywords": [
+    "Merkle tree",
+    "Hash",
+    "Content Hashes"
+  ],
   "devDependencies": {
     "@openzeppelin/contracts": "3.1.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
     "chai": "^4.2.0",
     "commander": "^6.1.0",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
     "ethereum-waffle": "^3.0.0",
     "mocha": "^6.2.2",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.0",
     "solc": "0.6.11",
@@ -35,12 +55,18 @@
     "typescript": "^3.7.3"
   },
   "scripts": {
-    "precompile": "rimraf ./build/",
+    "test:coverage": "nyc mocha && nyc report --reporter=text-lcov > ./lcov.info",
+    "build": "npx tsc -p tsconfig.json",
+    "check:prettier": "prettier -c './**/*.{js,ts,json,yml,md,tsx}'",
+    "check:code": "eslint . --max-warnings=0",
+    "fix:code": "npm run check:code -- --fix",
+    "fix:prettier": "prettier --write ./**/*.{js,ts,json,yml,md}",
     "compile": "waffle",
+    "pretest": "npm run compile",
     "test": "mocha",
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
-    "generate-merkle-root:data": "ts-node scripts/generate-content-hashes-merkle-root.ts --input scripts/content_hashes.json",
-    "verify-merkle-root:proof": "ts-node scripts/verify-content-hashes-merkle-root.ts --input scripts/proof.json",
+    "generate-merkle-root:data": "ts-node scripts/generate-merkle-root.ts --input scripts/content_hashes.json",
+    "verify-merkle-root:proof": "ts-node scripts/verify-merkle-root.ts --input scripts/proof.json",
     "prepublishOnly": "npm run test"
   }
 }

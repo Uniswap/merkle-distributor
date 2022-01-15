@@ -1,6 +1,6 @@
 import { program } from 'commander'
 import fs from 'fs'
-import { parseBalanceMap } from '../src/parse-balance-map'
+import { generateTree } from '../src/index'
 
 program
   .version('0.0.0')
@@ -11,8 +11,16 @@ program
 
 program.parse(process.argv)
 
+console.time('generate-tree')
 const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
-console.log(JSON.stringify(parseBalanceMap(json)))
+const tree = generateTree(json)
+console.timeEnd('generate-tree')
+fs.writeFile('proofs.json', JSON.stringify(tree), (err) => {
+  if (err) {
+    throw err
+  }
+  console.log('Data written to file')
+})
