@@ -3,7 +3,7 @@ const { solidityKeccak256 } = utils
 
 function bufferToHex(buf: Buffer) {
   return '0x' + buf.toString('hex')
-};
+}
 
 export default class MerkleTree {
   private readonly elements: Buffer[]

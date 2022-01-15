@@ -1,7 +1,7 @@
 import MerkleTree from './merkle-tree'
 import { BigNumber, utils } from 'ethers'
 
-export default class ContentHashTree {
+export class ContentHashTree {
   private readonly tree: MerkleTree
   constructor(contentHashes: string[]) {
     this.tree = new MerkleTree(

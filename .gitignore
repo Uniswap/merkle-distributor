@@ -2,3 +2,4 @@ node_modules/
 build/
 wrangler.toml
 proofs.json
+dist
