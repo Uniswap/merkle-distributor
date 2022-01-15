@@ -23,6 +23,8 @@ jobs:
         run: npm ci
       - name: Build package
         run: npm run build
+      - name: Compile contracts
+        run: npm run compile
       - name: Run tests
         run: npm run test:coverage
       - name: Run linter
