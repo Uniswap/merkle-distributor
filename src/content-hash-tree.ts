@@ -1,23 +1,26 @@
 import MerkleTree from './merkle-tree'
 import { BigNumber, utils } from 'ethers'
 
+import { Item } from './types'
+
 export class ContentHashTree {
   private readonly tree: MerkleTree
-  constructor(contentHashes: string[]) {
+  constructor(contentHashes: Item[]) {
     this.tree = new MerkleTree(
-      contentHashes.map((contentHash, index) => {
-        return ContentHashTree.toNode(index, contentHash)
+      contentHashes.map(({ urn, contentHash }, index) => {
+        return ContentHashTree.toNode(index, urn, contentHash)
       })
     )
   }
 
   public static verifyProof(
     index: number | BigNumber,
+    urn: string,
     contentHash: string,
     proof: Buffer[],
     root: Buffer
   ): boolean {
-    let pair = ContentHashTree.toNode(index, contentHash)
+    let pair = ContentHashTree.toNode(index, urn, contentHash)
     for (const item of proof) {
       pair = MerkleTree.combinedHash(pair, item)
     }
@@ -26,10 +29,17 @@ export class ContentHashTree {
   }
 
   // keccak256(abi.encode(index, contentHash))
-  public static toNode(index: number | BigNumber, contentHash: string): Buffer {
+  public static toNode(
+    index: number | BigNumber,
+    urn: string,
+    contentHash: string
+  ): Buffer {
     return Buffer.from(
       utils
-        .solidityKeccak256(['uint256', 'string'], [index, contentHash])
+        .solidityKeccak256(
+          ['uint256', 'string', 'string'],
+          [index, urn, contentHash]
+        )
         .substr(2),
       'hex'
     )
@@ -40,7 +50,13 @@ export class ContentHashTree {
   }
 
   // returns the hex bytes32 values of the proof
-  public getProof(index: number | BigNumber, contentHash: string): string[] {
-    return this.tree.getHexProof(ContentHashTree.toNode(index, contentHash))
+  public getProof(
+    index: number | BigNumber,
+    urn: string,
+    contentHash: string
+  ): string[] {
+    return this.tree.getHexProof(
+      ContentHashTree.toNode(index, urn, contentHash)
+    )
   }
 }

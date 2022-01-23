@@ -6,9 +6,15 @@ export type MerkleDistributorInfo = {
   merkleRoot: string
   total: number
   proofs: {
-    [contentHash: string]: {
+    [urn: string]: {
+      contentHash: string
       index: number
       proof: string[]
     }
   }
+}
+
+export type Item = {
+  urn: string
+  contentHash: string
 }
