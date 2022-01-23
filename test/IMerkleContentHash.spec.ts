@@ -3,8 +3,9 @@ import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
 import { Contract } from 'ethers'
 import { ContentHashTree } from '../src/content-hash-tree'
 
-import Distributor from '../build/MerkleDistributor.json'
+import Distributor from '../build/MerkleContentHash.json'
 import { generateTree, verifyProof } from '../src/index'
+import { Item } from '../src/types'
 
 chai.use(solidity)
 
@@ -50,18 +51,7 @@ describe('MerkleDistributor', () => {
         [ZERO_BYTES32],
         overrides
       )
-      const res = await distributor.isValid(0, wallet0.address, [])
-      await expect(res).to.be.false
-    })
-
-    it('fails for invalid index', async () => {
-      const distributor = await deployContract(
-        wallet0,
-        Distributor,
-        [ZERO_BYTES32],
-        overrides
-      )
-      const res = await distributor.isValid(0, wallet0.address, [])
+      const res = await distributor.isValid(0, wallet0.address, wallet0.address, [])
       await expect(res).to.be.false
     })
 
@@ -70,8 +60,14 @@ describe('MerkleDistributor', () => {
       let tree: ContentHashTree
       beforeEach('deploy', async () => {
         tree = new ContentHashTree([
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8',
-          'QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N'
+          {
+            "urn": "urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0",
+            "contentHash": "jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre"
+          },
+          {
+            "urn": "urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1",
+            "contentHash": "Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU"
+          },
         ])
         distributor = await deployContract(
           wallet0,
@@ -84,11 +80,13 @@ describe('MerkleDistributor', () => {
       it('successful verification', async () => {
         const proof0 = tree.getProof(
           0,
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8'
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0',
+          'jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre'
         )
         let res = await distributor.isValid(
           0,
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8',
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0',
+          'jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre',
           proof0,
           overrides
         )
@@ -96,11 +94,13 @@ describe('MerkleDistributor', () => {
 
         const proof1 = tree.getProof(
           1,
-          'QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N'
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1',
+          'Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU'
         )
         res = await distributor.isValid(
           1,
-          'QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N',
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1',
+          'Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU',
           proof1,
           overrides
         )
@@ -110,11 +110,13 @@ describe('MerkleDistributor', () => {
       it('cannot claim for content hash other than proof', async () => {
         const proof0 = tree.getProof(
           0,
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8'
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0',
+          'jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre'
         )
         const res = await distributor.isValid(
           1,
-          'QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N',
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1',
+          'Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU',
           proof0,
           overrides
         )
@@ -124,11 +126,13 @@ describe('MerkleDistributor', () => {
       it('cannot claim more than proof for index', async () => {
         const proof0 = tree.getProof(
           0,
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8'
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0',
+          'jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre'
         )
         const res = await distributor.isValid(
           1,
-          'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8',
+          'urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0',
+          'jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre',
           proof0,
           overrides
         )
@@ -136,14 +140,14 @@ describe('MerkleDistributor', () => {
       })
     })
     describe('larger tree', () => {
-      const contentHashes = wallets.map(() => {
-        return characters.charAt(Math.floor(Math.random() * charactersLength))
+      const items = wallets.map((wallet) => {
+        return { urn: wallet.address, contentHash: characters.charAt(Math.floor(Math.random() * charactersLength)) }
       })
 
       let distributor: Contract
       let tree: ContentHashTree
       beforeEach('deploy', async () => {
-        tree = new ContentHashTree(contentHashes)
+        tree = new ContentHashTree(items)
         distributor = await deployContract(
           wallet0,
           Distributor,
@@ -153,10 +157,11 @@ describe('MerkleDistributor', () => {
       })
 
       it('claim index 4', async () => {
-        const proof = tree.getProof(4, contentHashes[4])
+        const proof = tree.getProof(4, items[4].urn, items[4].contentHash)
         const res = await distributor.isValid(
           4,
-          contentHashes[4],
+          items[4].urn,
+          items[4].contentHash,
           proof,
           overrides
         )
@@ -164,10 +169,11 @@ describe('MerkleDistributor', () => {
       })
 
       it('claim index 9', async () => {
-        const proof = tree.getProof(9, contentHashes[9])
+        const proof = tree.getProof(9, items[9].urn, items[9].contentHash)
         const res = await distributor.isValid(
           9,
-          contentHashes[9],
+          items[9].urn,
+          items[9].contentHash,
           proof,
           overrides
         )
@@ -181,12 +187,13 @@ describe('MerkleDistributor', () => {
       const NUM_LEAVES = 100_000
       const NUM_SAMPLES = 25
 
-      const elements: string[] = []
+      const elements: Item[] = []
       for (let i = 0; i < NUM_LEAVES; i++) {
         elements.push(
-          characters.charAt(Math.floor(Math.random() * charactersLength))
+          { urn: i.toString(), contentHash: characters.charAt(Math.floor(Math.random() * charactersLength)) }
         )
       }
+
 
       const tree = new ContentHashTree(elements)
 
@@ -194,10 +201,10 @@ describe('MerkleDistributor', () => {
         const root = Buffer.from(tree.getHexRoot().slice(2), 'hex')
         for (let i = 0; i < NUM_LEAVES; i += NUM_LEAVES / NUM_SAMPLES) {
           const proof = tree
-            .getProof(i, elements[i])
+            .getProof(i, elements[i].urn, elements[i].contentHash)
             .map((el: string) => Buffer.from(el.slice(2), 'hex'))
 
-          const validProof = verifyProof(i, elements[i], proof, root)
+          const validProof = verifyProof(i, elements[i].urn, elements[i].contentHash, proof, root)
           expect(validProof).to.be.true
         }
       })
@@ -212,7 +219,7 @@ describe('MerkleDistributor', () => {
       })
 
       it('gas', async () => {
-        const proof = tree.getProof(50000, elements[50000])
+        const proof = tree.getProof(50000, elements[50000].urn, elements[5000].contentHash)
         const res = await distributor.isValid(
           50000,
           elements[50000],
@@ -227,16 +234,26 @@ describe('MerkleDistributor', () => {
   describe('parseBalanceMap', () => {
     let distributor: Contract
     let proofs: {
-      [contentHash: string]: {
+      [urn: string]: {
+        contentHash: string
         index: number
         proof: string[]
       }
     }
 
-    const elements: string[] = [
-      'QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8',
-      'QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N',
-      'QmTQZXMoieaUbTVmvoL1wgTfuxFMTCgrTfSoLD5sJQr1E4'
+    const elements: Item[] = [
+      {
+        "urn": "urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0",
+        "contentHash": "jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre"
+      },
+      {
+        "urn": "urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1",
+        "contentHash": "Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU"
+      },
+      {
+        "urn": "urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:2",
+        "contentHash": "26NQHpWzEZ2ntpLMPSPB7aDWYDme5Z5KsIfK02GEwN8r2U"
+      },
     ]
 
     beforeEach('deploy', async () => {
@@ -253,35 +270,39 @@ describe('MerkleDistributor', () => {
 
     it('check the proofs is as expected', () => {
       expect(proofs).to.deep.eq({
-        ['QmTQZXMoieaUbTVmvoL1wgTfuxFMTCgrTfSoLD5sJQr1E4']: {
+        ['urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:0']: {
           index: 0,
+          contentHash: "jJCrFHix2NJw9EqrdqQaV08iRRlnObxVP7LLAmufjc9Vre",
           proof: [
-            '0x48c0ca76d7c07296b6ab47abc261e5ff457183e7e0267e62942b32e33c00ca0a',
-            '0x884f61ae97ac3c79a2c8252e53e80fc4fdd0a12c4ca6c6b6aac6b9838b2bd5be'
+            '0xdfb8c5ec017455b241a3ff75ad08e74c4c4d8aef63aae7a29134a735e4a60fb0',
           ]
         },
-        ['QmTZzpvVdNbXXMrakkZvGnapuwJRAos9e4VnfCBcNva78N']: {
+        ['urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:1']: {
           index: 1,
+          contentHash: "Py3uD6Bw4bj6sSvJOchGs6becOjsB1PeRmVhdvCxZEALWU",
           proof: [
-            '0x796a113deaa9b91240bca898272af6c57fa81c48d7349336b19a1ca3bd9ef321'
+            '0xcda7554c7e2f51fc54f813c020169fbda39f975ab2b7a4a8a39e91b79a68cac7',
+            '0xf3a232ba4106d2c425f0c5484fdb439359c98f3b05773c8d05246655c398f36b'
           ]
         },
-        ['QmVxw4Nvg4FMTcCwa7doiNZpshLJbCq8dokzgRTPGtqUy8']: {
+        ['urn:decentraland:matic:collections-thirdparty:cryptohats:0xc04528c14c8ffd84c7c1fb6719b4a89853035cdd:2']: {
           index: 2,
+          contentHash: "26NQHpWzEZ2ntpLMPSPB7aDWYDme5Z5KsIfK02GEwN8r2U",
           proof: [
-            '0x70718eb9ee724e904cfafa344172fd064aa8432ff88b313e1ecde6cb31e689f9',
-            '0x884f61ae97ac3c79a2c8252e53e80fc4fdd0a12c4ca6c6b6aac6b9838b2bd5be'
+            '0x4761ca7d6847c587c7af4b763be6df03501a53f6d42f3c51459c67aae21a9b5f',
+            '0xf3a232ba4106d2c425f0c5484fdb439359c98f3b05773c8d05246655c398f36b'
           ]
-        }
+        },
       })
     })
 
     it('all claims work exactly once', async () => {
-      for (const contentHash in proofs) {
-        const data = proofs[contentHash]
+      for (const urn in proofs) {
+        const data = proofs[urn]
         const res = await distributor.isValid(
           data.index,
-          contentHash,
+          urn,
+          data.contentHash,
           data.proof,
           overrides
         )
