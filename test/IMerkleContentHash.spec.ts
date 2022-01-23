@@ -219,10 +219,11 @@ describe('MerkleDistributor', () => {
       })
 
       it('gas', async () => {
-        const proof = tree.getProof(50000, elements[50000].urn, elements[5000].contentHash)
+        const proof = tree.getProof(50000, elements[50000].urn, elements[50000].contentHash)
         const res = await distributor.isValid(
           50000,
-          elements[50000],
+          elements[50000].urn,
+          elements[50000].contentHash,
           proof,
           overrides
         )
