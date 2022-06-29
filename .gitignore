@@ -3,3 +3,4 @@ build/
 wrangler.toml
 artifacts/
 .idea
+cache/
