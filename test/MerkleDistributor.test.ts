@@ -231,5 +231,84 @@ describe("MerkleDistributor tests", () => {
         expect(receipt.gasUsed).to.eq(67341)
       })
     })
+
+    describe('realistic size tree', () => {
+      let distributor: Contract
+      let tree: BalanceTree
+      const NUM_LEAVES = 100_000
+      const NUM_SAMPLES = 25
+
+      beforeEach('deploy', async () => {
+        const elements: { account: string; amount: BigNumber }[] = []
+        for (let i = 0; i < NUM_LEAVES; i++) {
+          const node = { account: wallet0.address, amount: BigNumber.from(100) }
+          elements.push(node)
+        }
+        tree = new BalanceTree(elements)
+        distributor = await distributorFactory.deploy(token.address, tree.getHexRoot(), overrides)
+        await token.setBalance(distributor.address, constants.MaxUint256)
+      })
+
+      it('proof verification works', () => {
+        const root = Buffer.from(tree.getHexRoot().slice(2), 'hex')
+        for (let i = 0; i < NUM_LEAVES; i += NUM_LEAVES / NUM_SAMPLES) {
+          const proof = tree
+            .getProof(i, wallet0.address, BigNumber.from(100))
+            .map((el) => Buffer.from(el.slice(2), 'hex'))
+          const validProof = BalanceTree.verifyProof(i, wallet0.address, BigNumber.from(100), proof, root)
+          expect(validProof).to.be.true
+        }
+      })
+
+      it('gas', async () => {
+        const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
+        const tx = await distributor.claim(50000, wallet0.address, 100, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(94446)
+      })
+      it('gas deeper node', async () => {
+        const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
+        const tx = await distributor.claim(90000, wallet0.address, 100, proof, overrides)
+        const receipt = await tx.wait()
+        expect(receipt.gasUsed).to.eq(94418)
+      })
+      it('gas average random distribution', async () => {
+        let total: BigNumber = BigNumber.from(0)
+        let count: number = 0
+        for (let i = 0; i < NUM_LEAVES; i += NUM_LEAVES / NUM_SAMPLES) {
+          const proof = tree.getProof(i, wallet0.address, BigNumber.from(100))
+          const tx = await distributor.claim(i, wallet0.address, 100, proof, overrides)
+          const receipt = await tx.wait()
+          total = total.add(receipt.gasUsed)
+          count++
+        }
+        const average = total.div(count)
+        expect(average).to.eq(77828)
+      })
+      // this is what we gas golfed by packing the bitmap
+      it('gas average first 25', async () => {
+        let total: BigNumber = BigNumber.from(0)
+        let count: number = 0
+        for (let i = 0; i < 25; i++) {
+          const proof = tree.getProof(i, wallet0.address, BigNumber.from(100))
+          const tx = await distributor.claim(i, wallet0.address, 100, proof, overrides)
+          const receipt = await tx.wait()
+          total = total.add(receipt.gasUsed)
+          count++
+        }
+        const average = total.div(count)
+        expect(average).to.eq(61562)
+      })
+
+      it('no double claims in random distribution', async () => {
+        for (let i = 0; i < 25; i += Math.floor(Math.random() * (NUM_LEAVES / NUM_SAMPLES))) {
+          const proof = tree.getProof(i, wallet0.address, BigNumber.from(100))
+          await distributor.claim(i, wallet0.address, 100, proof, overrides)
+          await expect(distributor.claim(i, wallet0.address, 100, proof, overrides)).to.be.revertedWith(
+            'MerkleDistributor: Drop already claimed.'
+          )
+        }
+      })
+    })
   })
 })
