@@ -31,7 +31,7 @@ contract MerkleDistributor is IMerkleDistributor {
         claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
     }
 
-    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual override {
         require(!isClaimed(index), 'MerkleDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
