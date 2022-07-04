@@ -373,4 +373,51 @@ describe("MerkleDistributor tests", () => {
       })
     })
   })
+
+  describe('#UniswapUSDCAirdrop', () => {
+    let distributor: Contract
+    let tree: BalanceTree
+    let currentTimestamp: number
+    beforeEach('deploy', async () => {
+      tree = new BalanceTree([
+        { account: wallet0.address, amount: BigNumber.from(100) },
+        { account: wallet1.address, amount: BigNumber.from(101) },
+      ])
+      const uniswapFactory = await ethers.getContractFactory("UniswapUSDCAirdrop", wallet0)
+      currentTimestamp = Math.floor(Date.now() / 1000);
+      // Set the endTime to be 1 year after currentTimestamp
+      distributor = await uniswapFactory.deploy(token.address, tree.getHexRoot(), currentTimestamp + 31536000, overrides)
+      await token.setBalance(distributor.address, 201)
+    })
+
+    it('successful claim', async () => {
+      const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
+      await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides))
+        .to.emit(distributor, 'Claimed')
+        .withArgs(0, wallet0.address, 100)
+    })
+
+    it('only owner can withdraw', async () => {
+      distributor = distributor.connect(wallet1);
+      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner');
+    })
+
+    it('cannot withdraw during claim window', async () => {
+      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Cannot withdraw during claim window');
+    })
+
+    it('cannot claim after end time', async () => {
+      // Move block timestamp to 1 second after the end time
+      await ethers.provider.send("evm_mine", [currentTimestamp + 31536001])
+      const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
+      await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides))
+        .to.be.revertedWith('Claim window is finished')
+    })
+
+    it('can withdraw after end time', async () => {
+      expect(await token.balanceOf(wallet0.address)).to.eq(0)
+      await distributor.withdraw(overrides);
+      expect(await token.balanceOf(wallet0.address)).to.eq(201)
+    })
+  })
 })
