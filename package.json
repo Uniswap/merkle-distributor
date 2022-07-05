@@ -38,9 +38,9 @@
   },
   "scripts": {
     "precompile": "rimraf ./build/",
-    "compile": "waffle",
+    "compile": "npx hardhat compile",
     "pretest": "yarn compile",
-    "test": "mocha",
+    "test": "npx hardhat test",
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
     "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test"
