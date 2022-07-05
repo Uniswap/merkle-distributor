@@ -1,9 +1,9 @@
-import chai, { expect } from "chai"
-import { solidity } from "ethereum-waffle"
-import { Contract, ContractFactory, BigNumber, constants } from "ethers"
+import chai, { expect } from 'chai'
+import { solidity } from 'ethereum-waffle'
+import { Contract, ContractFactory, BigNumber, constants } from 'ethers'
 import BalanceTree from '../src/balance-tree'
-import { ethers } from "hardhat"
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { parseBalanceMap } from '../src/parse-balance-map'
 
 chai.use(solidity)
@@ -14,8 +14,7 @@ const overrides = {
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
-describe("MerkleDistributor tests", () => {
-
+describe('MerkleDistributor tests', () => {
   let token: Contract
   let distributorFactory: ContractFactory
   let wallet0: SignerWithAddress
@@ -26,13 +25,13 @@ describe("MerkleDistributor tests", () => {
     wallets = await ethers.getSigners()
     wallet0 = wallets[0]
     wallet1 = wallets[1]
-    const tokenFactory = await ethers.getContractFactory("TestERC20", wallet0)
+    const tokenFactory = await ethers.getContractFactory('TestERC20', wallet0)
     token = await tokenFactory.deploy('Token', 'TKN', 0, overrides)
-    distributorFactory = await ethers.getContractFactory("MerkleDistributor", wallet0)
+    distributorFactory = await ethers.getContractFactory('MerkleDistributor', wallet0)
   })
 
   describe('#token', () => {
-    it("returns the token address", async () => {
+    it('returns the token address', async () => {
       const distributor = await distributorFactory.deploy(token.address, ZERO_BYTES32, overrides)
       expect(await distributor.token()).to.eq(token.address)
     })
@@ -340,7 +339,7 @@ describe("MerkleDistributor tests", () => {
             amount: '0xc8',
             proof: [
               '0x0782528e118c4350a2465fbeabec5e72fff06991a29f21c08d37a0d275e38ddd',
-              '0xf3c5acb53398e1d11dcaa74e37acc33d228f5da944fbdea9a918684074a21cdb'
+              '0xf3c5acb53398e1d11dcaa74e37acc33d228f5da944fbdea9a918684074a21cdb',
             ],
           },
           [wallet1.address]: {
@@ -365,9 +364,9 @@ describe("MerkleDistributor tests", () => {
           await expect(distributor.claim(claim.index, account, claim.amount, claim.proof, overrides))
             .to.emit(distributor, 'Claimed')
             .withArgs(claim.index, account, claim.amount)
-          await expect(distributor.claim(claim.index, account, claim.amount, claim.proof, overrides)).to.be.revertedWith(
-            'MerkleDistributor: Drop already claimed.'
-          )
+          await expect(
+            distributor.claim(claim.index, account, claim.amount, claim.proof, overrides)
+          ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
         }
         expect(await token.balanceOf(distributor.address)).to.eq(0)
       })
@@ -383,10 +382,15 @@ describe("MerkleDistributor tests", () => {
         { account: wallet0.address, amount: BigNumber.from(100) },
         { account: wallet1.address, amount: BigNumber.from(101) },
       ])
-      const uniswapFactory = await ethers.getContractFactory("UniswapUSDCAirdrop", wallet0)
-      currentTimestamp = Math.floor(Date.now() / 1000);
+      const uniswapFactory = await ethers.getContractFactory('UniswapUSDCAirdrop', wallet0)
+      currentTimestamp = Math.floor(Date.now() / 1000)
       // Set the endTime to be 1 year after currentTimestamp
-      distributor = await uniswapFactory.deploy(token.address, tree.getHexRoot(), currentTimestamp + 31536000, overrides)
+      distributor = await uniswapFactory.deploy(
+        token.address,
+        tree.getHexRoot(),
+        currentTimestamp + 31536000,
+        overrides
+      )
       await token.setBalance(distributor.address, 201)
     })
 
@@ -398,25 +402,26 @@ describe("MerkleDistributor tests", () => {
     })
 
     it('only owner can withdraw', async () => {
-      distributor = distributor.connect(wallet1);
-      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner');
+      distributor = distributor.connect(wallet1)
+      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('cannot withdraw during claim window', async () => {
-      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Cannot withdraw during claim window');
+      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Cannot withdraw during claim window')
     })
 
     it('cannot claim after end time', async () => {
       // Move block timestamp to 1 second after the end time
-      await ethers.provider.send("evm_mine", [currentTimestamp + 31536001])
+      await ethers.provider.send('evm_mine', [currentTimestamp + 31536001])
       const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
-      await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides))
-        .to.be.revertedWith('Claim window is finished')
+      await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
+        'Claim window is finished'
+      )
     })
 
     it('can withdraw after end time', async () => {
       expect(await token.balanceOf(wallet0.address)).to.eq(0)
-      await distributor.withdraw(overrides);
+      await distributor.withdraw(overrides)
       expect(await token.balanceOf(wallet0.address)).to.eq(201)
     })
   })
