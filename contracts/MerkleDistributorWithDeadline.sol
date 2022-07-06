@@ -5,7 +5,7 @@ import "./MerkleDistributor.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract UniswapUSDCAirdrop is MerkleDistributor, Ownable {
+contract MerkleDistributorWithDeadline is MerkleDistributor, Ownable {
     uint256 public immutable endTime;
 
     constructor (address token_, bytes32 merkleRoot_, uint256 endTime_) MerkleDistributor (token_, merkleRoot_) {

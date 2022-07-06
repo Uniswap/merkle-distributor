@@ -373,7 +373,7 @@ describe('MerkleDistributor tests', () => {
     })
   })
 
-  describe('#UniswapUSDCAirdrop', () => {
+  describe('#MerkleDistributorWithDeadline', () => {
     let distributor: Contract
     let tree: BalanceTree
     let currentTimestamp: number
@@ -382,10 +382,10 @@ describe('MerkleDistributor tests', () => {
         { account: wallet0.address, amount: BigNumber.from(100) },
         { account: wallet1.address, amount: BigNumber.from(101) },
       ])
-      const uniswapFactory = await ethers.getContractFactory('UniswapUSDCAirdrop', wallet0)
+      const merkleDistributorWithDeadlineFactory = await ethers.getContractFactory('MerkleDistributorWithDeadline', wallet0)
       currentTimestamp = Math.floor(Date.now() / 1000)
       // Set the endTime to be 1 year after currentTimestamp
-      distributor = await uniswapFactory.deploy(
+      distributor = await merkleDistributorWithDeadlineFactory.deploy(
         token.address,
         tree.getHexRoot(),
         currentTimestamp + 31536000,
