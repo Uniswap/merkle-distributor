@@ -411,7 +411,7 @@ describe('MerkleDistributor tests', () => {
     })
 
     it('cannot claim after end time', async () => {
-      // Move block timestamp to 1 second after the end time
+      // Move block timestamp to 1 second after the end time. This affects subsequent tests.
       await ethers.provider.send('evm_mine', [currentTimestamp + 31536001])
       const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
       await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
@@ -423,6 +423,11 @@ describe('MerkleDistributor tests', () => {
       expect(await token.balanceOf(wallet0.address)).to.eq(0)
       await distributor.withdraw(overrides)
       expect(await token.balanceOf(wallet0.address)).to.eq(201)
+    })
+
+    it('only owner can withdraw even after end time', async () => {
+      distributor = distributor.connect(wallet1)
+      await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner')
     })
   })
 })
