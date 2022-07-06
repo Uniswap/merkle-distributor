@@ -3,15 +3,15 @@ require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
 async function main() {
-  const UniswapUSDCAirdrop = await ethers.getContractFactory('UniswapUSDCAirdrop')
-  const uniswapUSDCAirdrop = await UniswapUSDCAirdrop.deploy(
+  const MerkleDistributorWithDeadline = await ethers.getContractFactory('MerkleDistributorWithDeadline')
+  const merkleDistributorWithDeadline = await MerkleDistributorWithDeadline.deploy(
     // USDC
     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    '0xaa4b1e44ad67cb80b72e0564cf81801e74fe81224e830959ee9e60b8429e5436',
+    '0xbe154afea9ba1e08729654a19c53952a892d6b37fe0b5d1bdf8ac4f51d03a426',
     1688493524
   )
-  await uniswapUSDCAirdrop.deployed()
-  console.log(`uniswapUSDCAirdrop deployed at ${uniswapUSDCAirdrop.address}`)
+  await merkleDistributorWithDeadline.deployed()
+  console.log(`merkleDistributorWithDeadline deployed at ${merkleDistributorWithDeadline.address}`)
 }
 
 main()
