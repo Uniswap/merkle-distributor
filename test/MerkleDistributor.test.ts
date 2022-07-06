@@ -13,10 +13,14 @@ const overrides = {
 }
 const gasUsed = {
   MerkleDistributor: {
-    twoAccountTree: 81091
+    twoAccountTree: 81091,
+    largerTreeFirstClaim: 84441,
+    largerTreeSecondClaim: 67341
   },
   MerkleDistributorWithDeadline: {
-    twoAccountTree: 81220
+    twoAccountTree: 81220,
+    largerTreeFirstClaim: 84570,
+    largerTreeSecondClaim: 67470
   }
 }
 
@@ -212,7 +216,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
               return { account: wallet.address, amount: BigNumber.from(ix + 1) }
             })
           )
-          distributor = await distributorFactory.deploy(token.address, tree.getHexRoot(), overrides)
+          distributor = await deployContract(distributorFactory, token.address, tree.getHexRoot(), contract)
           await token.setBalance(distributor.address, 201)
         })
 
@@ -234,7 +238,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           const proof = tree.getProof(9, wallets[9].address, BigNumber.from(10))
           const tx = await distributor.claim(9, wallets[9].address, 10, proof, overrides)
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(84441)
+          expect(receipt.gasUsed).to.eq(gasUsed[contract as keyof typeof gasUsed].largerTreeFirstClaim)
         })
 
         it('gas second down about 15k', async () => {
@@ -253,7 +257,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             overrides
           )
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(67341)
+          expect(receipt.gasUsed).to.eq(gasUsed[contract as keyof typeof gasUsed].largerTreeSecondClaim)
         })
       })
 
