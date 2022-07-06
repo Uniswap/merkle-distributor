@@ -11,6 +11,14 @@ chai.use(solidity)
 const overrides = {
   gasLimit: 9999999,
 }
+const gasUsed = {
+  MerkleDistributor: {
+    twoAccountTree: 81091
+  },
+  MerkleDistributorWithDeadline: {
+    twoAccountTree: 81220
+  }
+}
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -31,7 +39,7 @@ const deployContract = async (factory: ContractFactory, tokenAddress: string, me
 }
 
 for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
-  describe('MerkleDistributor tests', () => {
+  describe(`${contract} tests`, () => {
     let token: Contract
     let distributorFactory: ContractFactory
     let wallet0: SignerWithAddress
@@ -84,7 +92,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             { account: wallet0.address, amount: BigNumber.from(100) },
             { account: wallet1.address, amount: BigNumber.from(101) },
           ])
-          distributor = await distributorFactory.deploy(token.address, tree.getHexRoot(), overrides)
+          distributor = await deployContract(distributorFactory, token.address, tree.getHexRoot(), contract)
           await token.setBalance(distributor.address, 201)
         })
 
@@ -191,7 +199,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
           const tx = await distributor.claim(0, wallet0.address, 100, proof, overrides)
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(81091)
+          expect(receipt.gasUsed).to.eq(gasUsed[contract as keyof typeof gasUsed].twoAccountTree)
         })
       })
 
