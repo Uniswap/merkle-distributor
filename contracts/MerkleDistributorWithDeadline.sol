@@ -11,6 +11,7 @@ contract MerkleDistributorWithDeadline is MerkleDistributor, Ownable {
     uint256 public immutable endTime;
 
     constructor (address token_, bytes32 merkleRoot_, uint256 endTime_) MerkleDistributor (token_, merkleRoot_) {
+        require(endTime_ > block.timestamp, "endTime_ must be in the future");
         endTime = endTime_;
     }
 

@@ -426,7 +426,8 @@ describe('#MerkleDistributorWithDeadline', () => {
   let wallets: SignerWithAddress[]
   let distributor: Contract
   let tree: BalanceTree
-  let currentTimestamp: number
+  let currentTimestamp = Math.floor(Date.now() / 1000)
+
   beforeEach('deploy', async () => {
     wallets = await ethers.getSigners()
     wallet0 = wallets[0]
@@ -441,7 +442,6 @@ describe('#MerkleDistributorWithDeadline', () => {
       'MerkleDistributorWithDeadline',
       wallet0
     )
-    currentTimestamp = Math.floor(Date.now() / 1000)
     // Set the endTime to be 1 year after currentTimestamp
     distributor = await merkleDistributorWithDeadlineFactory.deploy(
       token.address,
@@ -469,8 +469,9 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('cannot claim after end time', async () => {
-    // Move block timestamp to 1 second after the end time. This affects subsequent tests.
-    await ethers.provider.send('evm_mine', [currentTimestamp + 31536001])
+    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
+    currentTimestamp = oneSecondAfterEndTime
     const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
     await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
       'Claim window is finished'
@@ -478,12 +479,17 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('can withdraw after end time', async () => {
+    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
+    currentTimestamp = oneSecondAfterEndTime
     expect(await token.balanceOf(wallet0.address)).to.eq(0)
     await distributor.withdraw(overrides)
     expect(await token.balanceOf(wallet0.address)).to.eq(201)
   })
 
   it('only owner can withdraw even after end time', async () => {
+    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
     distributor = distributor.connect(wallet1)
     await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner')
   })
