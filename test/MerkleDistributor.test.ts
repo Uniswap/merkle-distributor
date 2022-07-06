@@ -70,7 +70,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
       })
 
       it('fails for invalid index', async () => {
-        const distributor = await distributorFactory.deploy(token.address, ZERO_BYTES32, overrides)
+        const distributor = await deployContract(distributorFactory, token.address, ZERO_BYTES32, contract)
         await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
           'MerkleDistributor: Invalid proof.'
         )
