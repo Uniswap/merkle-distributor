@@ -19,7 +19,7 @@ const gasUsed = {
     realisticTreeGas: 95280,
     realisticTreeGasDeeperNode: 95196,
     realisticTreeGasAverageRandom: 78622,
-    realisticTreeGasAverageFirst25: 62356
+    realisticTreeGasAverageFirst25: 62356,
   },
   MerkleDistributorWithDeadline: {
     twoAccountTree: 82123,
@@ -28,8 +28,8 @@ const gasUsed = {
     realisticTreeGas: 95409,
     realisticTreeGasDeeperNode: 95325,
     realisticTreeGasAverageRandom: 78751,
-    realisticTreeGasAverageFirst25: 62485
-  }
+    realisticTreeGasAverageFirst25: 62485,
+  },
 }
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -38,14 +38,9 @@ const deployContract = async (factory: ContractFactory, tokenAddress: string, me
   let distributor
   const currentTimestamp = Math.floor(Date.now() / 1000)
   if (contract === 'MerkleDistributorWithDeadline') {
-    distributor = await factory.deploy(
-      tokenAddress,
-      merkleRoot,
-      currentTimestamp + 31536000,
-      overrides
-    )
+    distributor = await factory.deploy(tokenAddress, merkleRoot, currentTimestamp + 31536000, overrides)
   } else {
-    distributor = await factory.deploy(tokenAddress, merkleRoot, overrides);
+    distributor = await factory.deploy(tokenAddress, merkleRoot, overrides)
   }
   return distributor
 }
@@ -168,7 +163,13 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           )
 
           await expect(
-            distributor.claim(0, wallet0.address, 100, tree.getProof(0, wallet0.address, BigNumber.from(100)), overrides)
+            distributor.claim(
+              0,
+              wallet0.address,
+              100,
+              tree.getProof(0, wallet0.address, BigNumber.from(100)),
+              overrides
+            )
           ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
         })
 
@@ -189,7 +190,13 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           )
 
           await expect(
-            distributor.claim(1, wallet1.address, 101, tree.getProof(1, wallet1.address, BigNumber.from(101)), overrides)
+            distributor.claim(
+              1,
+              wallet1.address,
+              101,
+              tree.getProof(1, wallet1.address, BigNumber.from(101)),
+              overrides
+            )
           ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
         })
 
@@ -430,7 +437,10 @@ describe('#MerkleDistributorWithDeadline', () => {
       { account: wallet0.address, amount: BigNumber.from(100) },
       { account: wallet1.address, amount: BigNumber.from(101) },
     ])
-    const merkleDistributorWithDeadlineFactory = await ethers.getContractFactory('MerkleDistributorWithDeadline', wallet0)
+    const merkleDistributorWithDeadlineFactory = await ethers.getContractFactory(
+      'MerkleDistributorWithDeadline',
+      wallet0
+    )
     currentTimestamp = Math.floor(Date.now() / 1000)
     // Set the endTime to be 1 year after currentTimestamp
     distributor = await merkleDistributorWithDeadlineFactory.deploy(
