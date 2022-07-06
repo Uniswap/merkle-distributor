@@ -15,12 +15,20 @@ const gasUsed = {
   MerkleDistributor: {
     twoAccountTree: 81091,
     largerTreeFirstClaim: 84441,
-    largerTreeSecondClaim: 67341
+    largerTreeSecondClaim: 67341,
+    realisticTreeGas: 94446,
+    realisticTreeGasDeeperNode: 94418,
+    realisticTreeGasAverageRandom: 77828,
+    realisticTreeGasAverageFirst25: 61562
   },
   MerkleDistributorWithDeadline: {
     twoAccountTree: 81220,
     largerTreeFirstClaim: 84570,
-    largerTreeSecondClaim: 67470
+    largerTreeSecondClaim: 67470,
+    realisticTreeGas: 94575,
+    realisticTreeGasDeeperNode: 94547,
+    realisticTreeGasAverageRandom: 77957,
+    realisticTreeGasAverageFirst25: 61691
   }
 }
 
@@ -274,7 +282,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             elements.push(node)
           }
           tree = new BalanceTree(elements)
-          distributor = await distributorFactory.deploy(token.address, tree.getHexRoot(), overrides)
+          distributor = await deployContract(distributorFactory, token.address, tree.getHexRoot(), contract)
           await token.setBalance(distributor.address, constants.MaxUint256)
         })
 
@@ -293,13 +301,13 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
           const tx = await distributor.claim(50000, wallet0.address, 100, proof, overrides)
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(94446)
+          expect(receipt.gasUsed).to.eq(gasUsed[contract as keyof typeof gasUsed].realisticTreeGas)
         })
         it('gas deeper node', async () => {
           const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
           const tx = await distributor.claim(90000, wallet0.address, 100, proof, overrides)
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(94418)
+          expect(receipt.gasUsed).to.eq(gasUsed[contract as keyof typeof gasUsed].realisticTreeGasDeeperNode)
         })
         it('gas average random distribution', async () => {
           let total: BigNumber = BigNumber.from(0)
@@ -312,7 +320,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             count++
           }
           const average = total.div(count)
-          expect(average).to.eq(77828)
+          expect(average).to.eq(gasUsed[contract as keyof typeof gasUsed].realisticTreeGasAverageRandom)
         })
         // this is what we gas golfed by packing the bitmap
         it('gas average first 25', async () => {
@@ -326,7 +334,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             count++
           }
           const average = total.div(count)
-          expect(average).to.eq(61562)
+          expect(average).to.eq(gasUsed[contract as keyof typeof gasUsed].realisticTreeGasAverageFirst25)
         })
 
         it('no double claims in random distribution', async () => {
