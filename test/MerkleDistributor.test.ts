@@ -22,13 +22,13 @@ const gasUsed = {
     realisticTreeGasAverageFirst25: 62356,
   },
   MerkleDistributorWithDeadline: {
-    twoAccountTree: 82123,
-    largerTreeFirstClaim: 85460,
-    largerTreeSecondClaim: 68360,
-    realisticTreeGas: 95409,
-    realisticTreeGasDeeperNode: 95325,
-    realisticTreeGasAverageRandom: 78751,
-    realisticTreeGasAverageFirst25: 62485,
+    twoAccountTree: 82126,
+    largerTreeFirstClaim: 85463,
+    largerTreeSecondClaim: 68363,
+    realisticTreeGas: 95412,
+    realisticTreeGasDeeperNode: 95328,
+    realisticTreeGasAverageRandom: 78754,
+    realisticTreeGasAverageFirst25: 62488,
   },
 }
 
@@ -465,7 +465,7 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('cannot withdraw during claim window', async () => {
-    await expect(distributor.withdraw(overrides)).to.be.revertedWith('Cannot withdraw during claim window')
+    await expect(distributor.withdraw(overrides)).to.be.revertedWith('NoWithdrawDuringClaim()')
   })
 
   it('cannot claim after end time', async () => {
@@ -474,7 +474,7 @@ describe('#MerkleDistributorWithDeadline', () => {
     currentTimestamp = oneSecondAfterEndTime
     const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
     await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
-      'Claim window is finished'
+      'ClaimWindowFinished()'
     )
   })
 
