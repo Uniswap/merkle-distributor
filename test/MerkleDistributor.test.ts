@@ -80,14 +80,14 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
       it('fails for empty proof', async () => {
         const distributor = await deployContract(distributorFactory, token.address, ZERO_BYTES32, contract)
         await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
-          'MerkleDistributor: Invalid proof.'
+          'InvalidProof()'
         )
       })
 
       it('fails for invalid index', async () => {
         const distributor = await deployContract(distributorFactory, token.address, ZERO_BYTES32, contract)
         await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
-          'MerkleDistributor: Invalid proof.'
+          'InvalidProof()'
         )
       })
 
@@ -142,7 +142,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
           await distributor.claim(0, wallet0.address, 100, proof0, overrides)
           await expect(distributor.claim(0, wallet0.address, 100, proof0, overrides)).to.be.revertedWith(
-            'MerkleDistributor: Drop already claimed.'
+            'AlreadyClaimed()'
           )
         })
 
@@ -170,7 +170,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
               tree.getProof(0, wallet0.address, BigNumber.from(100)),
               overrides
             )
-          ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
+          ).to.be.revertedWith('AlreadyClaimed()')
         })
 
         it('cannot claim more than once: 1 and then 0', async () => {
@@ -197,20 +197,20 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
               tree.getProof(1, wallet1.address, BigNumber.from(101)),
               overrides
             )
-          ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
+          ).to.be.revertedWith('AlreadyClaimed()')
         })
 
         it('cannot claim for address other than proof', async () => {
           const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
           await expect(distributor.claim(1, wallet1.address, 101, proof0, overrides)).to.be.revertedWith(
-            'MerkleDistributor: Invalid proof.'
+            'InvalidProof()'
           )
         })
 
         it('cannot claim more than proof', async () => {
           const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
           await expect(distributor.claim(0, wallet0.address, 101, proof0, overrides)).to.be.revertedWith(
-            'MerkleDistributor: Invalid proof.'
+            'InvalidProof()'
           )
         })
 
@@ -349,7 +349,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             const proof = tree.getProof(i, wallet0.address, BigNumber.from(100))
             await distributor.claim(i, wallet0.address, 100, proof, overrides)
             await expect(distributor.claim(i, wallet0.address, 100, proof, overrides)).to.be.revertedWith(
-              'MerkleDistributor: Drop already claimed.'
+              'AlreadyClaimed()'
             )
           }
         })
@@ -410,7 +410,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
               .withArgs(claim.index, account, claim.amount)
             await expect(
               distributor.claim(claim.index, account, claim.amount, claim.proof, overrides)
-            ).to.be.revertedWith('MerkleDistributor: Drop already claimed.')
+            ).to.be.revertedWith('AlreadyClaimed()')
           }
           expect(await token.balanceOf(distributor.address)).to.eq(0)
         })

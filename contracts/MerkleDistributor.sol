@@ -2,8 +2,11 @@
 pragma solidity =0.8.15;
 
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "./interfaces/IMerkleDistributor.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
+
+error AlreadyClaimed();
+error InvalidProof();
 
 contract MerkleDistributor is IMerkleDistributor {
     using SafeERC20 for IERC20;
@@ -34,11 +37,11 @@ contract MerkleDistributor is IMerkleDistributor {
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public virtual override {
-        require(!isClaimed(index), 'MerkleDistributor: Drop already claimed.');
+        if (isClaimed(index)) revert AlreadyClaimed();
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
+        if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
 
         // Mark it claimed and send the token.
         _setClaimed(index);
