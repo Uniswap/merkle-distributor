@@ -79,16 +79,12 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
     describe('#claim', () => {
       it('fails for empty proof', async () => {
         const distributor = await deployContract(distributorFactory, token.address, ZERO_BYTES32, contract)
-        await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
-          'InvalidProof()'
-        )
+        await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith('InvalidProof()')
       })
 
       it('fails for invalid index', async () => {
         const distributor = await deployContract(distributorFactory, token.address, ZERO_BYTES32, contract)
-        await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
-          'InvalidProof()'
-        )
+        await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith('InvalidProof()')
       })
 
       describe('two account tree', () => {
@@ -469,7 +465,7 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('cannot claim after end time', async () => {
-    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    const oneSecondAfterEndTime = currentTimestamp + 31536001
     await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
     currentTimestamp = oneSecondAfterEndTime
     const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
@@ -479,7 +475,7 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('can withdraw after end time', async () => {
-    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    const oneSecondAfterEndTime = currentTimestamp + 31536001
     await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
     currentTimestamp = oneSecondAfterEndTime
     expect(await token.balanceOf(wallet0.address)).to.eq(0)
@@ -488,7 +484,7 @@ describe('#MerkleDistributorWithDeadline', () => {
   })
 
   it('only owner can withdraw even after end time', async () => {
-    const oneSecondAfterEndTime = currentTimestamp + 31536001;
+    const oneSecondAfterEndTime = currentTimestamp + 31536001
     await ethers.provider.send('evm_mine', [oneSecondAfterEndTime])
     distributor = distributor.connect(wallet1)
     await expect(distributor.withdraw(overrides)).to.be.revertedWith('Ownable: caller is not the owner')
