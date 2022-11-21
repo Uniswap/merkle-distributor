@@ -1,34 +1,47 @@
 {
   "name": "@uniswap/merkle-distributor",
-  "author": {
-    "name": "Moody Salem"
-  },
-  "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
   "version": "1.0.1",
-  "homepage": "https://uniswap.org",
+  "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
   "keywords": [
     "uniswap",
     "erc20"
   ],
+  "homepage": "https://uniswap.org",
   "repository": {
     "type": "git",
     "url": "https://github.com/Uniswap/merkle-distributor"
   },
+  "author": {
+    "name": "Moody Salem"
+  },
   "files": [
     "build"
   ],
-  "engines": {
-    "node": ">=16"
+  "scripts": {
+    "precompile": "rimraf ./build/",
+    "compile": "npx hardhat compile",
+    "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
+    "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
+    "prepublishOnly": "yarn test",
+    "pretest": "yarn compile",
+    "test": "npx hardhat test"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "4.7.0"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "4.7.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "axios": "^0.20.0",
     "chai": "^4.2.0",
     "commander": "^6.1.0",
+    "dotenv": "^16.0.1",
     "ethereum-waffle": "^3.0.0",
     "ethereumjs-util": "^7.0.4",
+    "ethers": "5.6.9",
+    "hardhat": "^2.9.9",
     "mocha": "^6.2.2",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.0",
@@ -36,20 +49,7 @@
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   },
-  "scripts": {
-    "precompile": "rimraf ./build/",
-    "compile": "npx hardhat compile",
-    "pretest": "yarn compile",
-    "test": "npx hardhat test",
-    "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
-    "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
-    "prepublishOnly": "yarn test"
-  },
-  "dependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.6",
-    "@nomiclabs/hardhat-waffle": "^2.0.3",
-    "dotenv": "^16.0.1",
-    "ethers": "5.6.9",
-    "hardhat": "^2.9.9"
+  "engines": {
+    "node": ">=16"
   }
 }
