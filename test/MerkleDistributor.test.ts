@@ -1,9 +1,9 @@
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import chai, { expect } from 'chai'
 import { solidity } from 'ethereum-waffle'
-import { Contract, ContractFactory, BigNumber, constants } from 'ethers'
-import BalanceTree from '../src/balance-tree'
+import { BigNumber, constants, Contract, ContractFactory } from 'ethers'
 import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import BalanceTree from '../src/balance-tree'
 import { parseBalanceMap } from '../src/parse-balance-map'
 
 chai.use(solidity)
@@ -13,22 +13,22 @@ const overrides = {
 }
 const gasUsed = {
   MerkleDistributor: {
-    twoAccountTree: 81994,
-    largerTreeFirstClaim: 85331,
-    largerTreeSecondClaim: 68231,
-    realisticTreeGas: 95280,
-    realisticTreeGasDeeperNode: 95196,
-    realisticTreeGasAverageRandom: 78622,
-    realisticTreeGasAverageFirst25: 62356,
+    twoAccountTree: 81970,
+    largerTreeFirstClaim: 85307,
+    largerTreeSecondClaim: 68207,
+    realisticTreeGas: 95256,
+    realisticTreeGasDeeperNode: 95172,
+    realisticTreeGasAverageRandom: 78598,
+    realisticTreeGasAverageFirst25: 62332,
   },
   MerkleDistributorWithDeadline: {
-    twoAccountTree: 82126,
-    largerTreeFirstClaim: 85463,
-    largerTreeSecondClaim: 68363,
-    realisticTreeGas: 95412,
-    realisticTreeGasDeeperNode: 95328,
-    realisticTreeGasAverageRandom: 78754,
-    realisticTreeGasAverageFirst25: 62488,
+    twoAccountTree: 82102,
+    largerTreeFirstClaim: 85439,
+    largerTreeSecondClaim: 68339,
+    realisticTreeGas: 95388,
+    realisticTreeGasDeeperNode: 95304,
+    realisticTreeGasAverageRandom: 78730,
+    realisticTreeGasAverageFirst25: 62464,
   },
 }
 
