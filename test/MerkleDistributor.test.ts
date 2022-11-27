@@ -13,22 +13,22 @@ const overrides = {
 }
 const gasUsed = {
   MerkleDistributor: {
-    twoAccountTree: 81970,
-    largerTreeFirstClaim: 85307,
-    largerTreeSecondClaim: 68207,
-    realisticTreeGas: 95256,
-    realisticTreeGasDeeperNode: 95172,
-    realisticTreeGasAverageRandom: 78598,
-    realisticTreeGasAverageFirst25: 62332,
+    twoAccountTree: 84237,
+    largerTreeFirstClaim: 87574,
+    largerTreeSecondClaim: 70474,
+    realisticTreeGas: 97523,
+    realisticTreeGasDeeperNode: 97439,
+    realisticTreeGasAverageRandom: 80865,
+    realisticTreeGasAverageFirst25: 64599,
   },
   MerkleDistributorWithDeadline: {
-    twoAccountTree: 82102,
-    largerTreeFirstClaim: 85439,
-    largerTreeSecondClaim: 68339,
-    realisticTreeGas: 95388,
-    realisticTreeGasDeeperNode: 95304,
-    realisticTreeGasAverageRandom: 78730,
-    realisticTreeGasAverageFirst25: 62464,
+    twoAccountTree: 84311,
+    largerTreeFirstClaim: 87648,
+    largerTreeSecondClaim: 70548,
+    realisticTreeGas: 97597,
+    realisticTreeGasDeeperNode: 97513,
+    realisticTreeGasAverageRandom: 80939,
+    realisticTreeGasAverageFirst25: 64673,
   },
 }
 

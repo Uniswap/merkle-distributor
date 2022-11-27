@@ -2,14 +2,13 @@
 pragma solidity =0.8.17;
 
 import {MerkleDistributor} from "./MerkleDistributor.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 error EndTimeInPast();
 error ClaimWindowFinished();
 error NoWithdrawDuringClaim();
 
-contract MerkleDistributorWithDeadline is MerkleDistributor, Ownable {
+contract MerkleDistributorWithDeadline is MerkleDistributor {
     using SafeERC20 for IERC20;
 
     uint256 public immutable endTime;
