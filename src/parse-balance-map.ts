@@ -22,7 +22,7 @@ interface MerkleDistributorInfo {
   }
 }
 
-type OldFormat = { [account: string]: number | string }
+type OldFormat = { [account: string]: string }
 type NewFormat = { address: string; earnings: string; reasons: string }
 
 export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistributorInfo {
@@ -32,7 +32,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     : Object.keys(balances).map(
         (account): NewFormat => ({
           address: account,
-          earnings: `0x${balances[account].toString(16)}`,
+          earnings: `${balances[account]}`,
           reasons: '',
         })
       )
@@ -72,7 +72,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     const { amount, flags } = dataByAddress[address]
     memo[address] = {
       index,
-      amount: amount.toHexString(),
+      amount: amount.toString(),
       proof: tree.getProof(index, address, amount),
       ...(flags ? { flags } : {}),
     }
@@ -86,7 +86,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
 
   return {
     merkleRoot: tree.getHexRoot(),
-    tokenTotal: tokenTotal.toHexString(),
+    tokenTotal: tokenTotal.toString(),
     claims,
   }
 }

@@ -20,7 +20,7 @@
   "scripts": {
     "precompile": "rimraf ./build/",
     "compile": "npx hardhat compile",
-    "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
+    "generate": "ts-node scripts/generate-merkle-root.ts -i ./scripts/distribution.json > ./scripts/result.json",
     "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test",
     "pretest": "yarn compile",
