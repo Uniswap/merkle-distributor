@@ -15,4 +15,7 @@ const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
-console.log(JSON.stringify(parseBalanceMap(json)))
+const content = JSON.stringify(parseBalanceMap(json))
+fs.writeFileSync('balanceMapTree.json', content)
+
+console.log(content)
