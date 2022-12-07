@@ -4,3 +4,6 @@ wrangler.toml
 artifacts/
 .idea
 cache/
+.vs_code
+*.json
+.env

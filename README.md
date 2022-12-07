@@ -1,20 +1,12 @@
-# @uniswap/merkle-distributor
+# Installation
+1. `yarn install`
+2. `cp .env.example .env`
 
-[![Tests](https://github.com/Uniswap/merkle-distributor/workflows/Tests/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ATests)
-[![Lint](https://github.com/Uniswap/merkle-distributor/workflows/Lint/badge.svg)](https://github.com/Uniswap/merkle-distributor/actions?query=workflow%3ALint)
+Manually create Tenderly fork and paste fork-id in .env for testing.
 
-# Local Development
+# Commands
 
-The following assumes the use of `node@>=10`.
+| Command                           | Option                                                       | Required | Description          | Result                              |
+|-----------------------------------|--------------------------------------------------------------|----------|----------------------|-------------------------------------|
+| generate-merkle-root              | -i, --input path to JSON file in format `{address: balance}` | Yes      | Generate Merkle tree | Outputs balanceMapTree.json in root |
 
-## Install Dependencies
-
-`yarn`
-
-## Compile Contracts
-
-`yarn compile`
-
-## Run Tests
-
-`yarn test`
