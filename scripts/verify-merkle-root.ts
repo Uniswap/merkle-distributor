@@ -92,7 +92,16 @@ Object.keys(json.claims).forEach((address) => {
   const proof = claim.proof.map((p: string) => Buffer.from(p.slice(2), 'hex'))
   balances.push({ index: claim.index, account: address, amount: BigNumber.from(claim.amount) })
   if (verifyProof(claim.index, address, claim.amount, proof, merkleRoot)) {
-    console.log('Verified proof for', claim.index, address)
+    console.log({
+      description: 'Verified proof',
+      index: claim.index,
+      address,
+      amount: {
+        hex: claim.amount,
+        number: parseInt(claim.amount, 16),
+      },
+      nodeHash: `0x${toNode(claim.index, address, claim.amount).toString('hex')}`,
+    })
   } else {
     console.log('Verification for', address, 'failed')
     valid = false
