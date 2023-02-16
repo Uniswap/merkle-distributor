@@ -32,7 +32,7 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
     : Object.keys(balances).map(
         (account): NewFormat => ({
           address: account,
-          earnings: `0x${balances[account].toString(16)}`,
+          earnings: BigNumber.from(balances[account]).toHexString(),
           reasons: '',
         })
       )
@@ -60,9 +60,13 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
 
   const sortedAddresses = Object.keys(dataByAddress).sort()
 
+  const treeInput = sortedAddresses.map((address) => ({ account: address, amount: dataByAddress[address].amount }));
+
+  console.log(treeInput);
+
   // construct a tree
   const tree = new BalanceTree(
-    sortedAddresses.map((address) => ({ account: address, amount: dataByAddress[address].amount }))
+    treeInput
   )
 
   // generate claims

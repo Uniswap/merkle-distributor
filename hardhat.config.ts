@@ -36,5 +36,9 @@ module.exports = {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`, // or any other JSON-RPC provider
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    mumbai: {
+      url: `https://rpc-mumbai.maticvigil.com`, // or any other JSON-RPC provider
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
 }
