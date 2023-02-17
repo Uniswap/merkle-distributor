@@ -1,15 +1,15 @@
 {
-  "name": "@uniswap/merkle-distributor",
+  "name": "@allianceblock/merkle-distributor",
   "version": "1.0.1",
   "description": "📦 A smart contract that distributes a balance of tokens according to a merkle root",
   "keywords": [
-    "uniswap",
+    "allianceblock",
     "erc20"
   ],
-  "homepage": "https://uniswap.org",
+  "homepage": "https://allianceblock.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/merkle-distributor"
+    "url": "https://github.com/Stichting-AllianceBlock-Foundation/merkle-distributor"
   },
   "author": {
     "name": "Moody Salem"
