@@ -20,7 +20,7 @@ contract MerkleDistributorWithDeadline is MerkleDistributor, Ownable {
     }
 
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) public override {
-        if (block.timestamp > endTime) revert ClaimWindowFinished();
+        if (block.timestamp >= endTime) revert ClaimWindowFinished();
         super.claim(index, account, amount, merkleProof);
     }
 

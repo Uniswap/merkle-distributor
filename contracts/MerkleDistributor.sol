@@ -5,11 +5,14 @@ import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeE
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {IMerkleDistributor} from "./interfaces/IMerkleDistributor.sol";
 
+error InvalidToken();
 error AlreadyClaimed();
-error InvalidProof();
+error InvalidProof(bytes32 merkleRoot);
 
 contract MerkleDistributor is IMerkleDistributor {
     using SafeERC20 for IERC20;
+
+    uint256 private constant WORD_SIZE = 256;
 
     address public immutable override token;
     bytes32 public immutable override merkleRoot;
@@ -18,21 +21,23 @@ contract MerkleDistributor is IMerkleDistributor {
     mapping(uint256 => uint256) private claimedBitMap;
 
     constructor(address token_, bytes32 merkleRoot_) {
+        if (token_ == address(0)) revert InvalidToken();
+
         token = token_;
         merkleRoot = merkleRoot_;
     }
 
     function isClaimed(uint256 index) public view override returns (bool) {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
+        uint256 claimedWordIndex = index / WORD_SIZE;
+        uint256 claimedBitIndex = index % WORD_SIZE;
         uint256 claimedWord = claimedBitMap[claimedWordIndex];
         uint256 mask = (1 << claimedBitIndex);
         return claimedWord & mask == mask;
     }
 
     function _setClaimed(uint256 index) private {
-        uint256 claimedWordIndex = index / 256;
-        uint256 claimedBitIndex = index % 256;
+        uint256 claimedWordIndex = index / WORD_SIZE;
+        uint256 claimedBitIndex = index % WORD_SIZE;
         claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
     }
 
@@ -45,7 +50,7 @@ contract MerkleDistributor is IMerkleDistributor {
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof();
+        if (!MerkleProof.verify(merkleProof, merkleRoot, node)) revert InvalidProof(merkleRoot);
 
         // Mark it claimed and send the token.
         _setClaimed(index);

@@ -22,13 +22,13 @@ const gasUsed = {
     realisticTreeGasAverageFirst25: 62332,
   },
   MerkleDistributorWithDeadline: {
-    twoAccountTree: 82102,
-    largerTreeFirstClaim: 85439,
-    largerTreeSecondClaim: 68339,
-    realisticTreeGas: 95388,
-    realisticTreeGasDeeperNode: 95304,
-    realisticTreeGasAverageRandom: 78730,
-    realisticTreeGasAverageFirst25: 62464,
+    twoAccountTree: 82099,
+    largerTreeFirstClaim: 85436,
+    largerTreeSecondClaim: 68336,
+    realisticTreeGas: 95385,
+    realisticTreeGasDeeperNode: 95301,
+    realisticTreeGasAverageRandom: 78727,
+    realisticTreeGasAverageFirst25: 62461,
   },
 }
 
