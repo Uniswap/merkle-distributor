@@ -8,7 +8,7 @@ async function main() {
     // Token Address
     '0x3330BFb7332cA23cd071631837dC289B09C33333',
     // Merkle root
-    '0x584062b7d1ee3a0ea2112a10155154f1370541f2365dd5bd90c2fa2417e26ca9'
+    '<MERKLE_ROOT>'
   )
   await merkleDistributor.deployed()
   console.log(`merkleDistributor deployed at ${merkleDistributor.address}`)
