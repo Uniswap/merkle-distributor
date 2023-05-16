@@ -11,10 +11,11 @@
 
 `yarn test`
 
-## Deploy preparations
+## Deploy steps
 
-1) Fulfill the [distribution.json](scripts/distribution.json) file
-2) Generate the merkle root and proofs
+1) Create _.env_ file using [.env.example](.env.example) as example
+2) Fill the [distribution.json](scripts/distribution.json) file with data
+3) Generate the merkle root and proofs
 
 ```bash
 yarn generate-merkle-root
