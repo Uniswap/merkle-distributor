@@ -24,7 +24,7 @@ for (let address in parsed.claims) {
   for (let i of parsed.claims[address].proof) {
     proofString = proofString.concat(i)
     if (i !== parsed.claims[address].proof[parsed.claims[address].proof.length - 1]) {
-      proofString = proofString.concat(';')
+      proofString = proofString.concat(',')
     } else {
       proofString = proofString.concat(']')
     }
@@ -38,5 +38,5 @@ for (let address in parsed.claims) {
   })
 }
 
-fs.writeFileSync('scripts/complete_result.json', JSON.stringify(parsed, null, 4));
-fs.writeFileSync('scripts/claims.json', JSON.stringify(claims, null, 4));
+fs.writeFileSync('scripts/02_05.front.json', JSON.stringify(parsed, null, 4));
+fs.writeFileSync('scripts/02_05.qa.json', JSON.stringify(claims, null, 4));
