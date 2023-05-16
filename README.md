@@ -17,7 +17,7 @@
 2) Generate the merkle root and proofs
 
 ```bash
-ts-node scripts/generate-merkle-root.ts -i .\scripts\distribution.json
+yarn generate-merkle-root
 ```
 3) Change data in the [deployMerkleDistributor.js](scripts/deployMerkleDistributor.js) file
 
@@ -31,6 +31,6 @@ ts-node scripts/generate-merkle-root.ts -i .\scripts\distribution.json
 ```
 4) Deploy
 ```bash
-
+yarn deploy --network <NETWORK>
 ```
 
