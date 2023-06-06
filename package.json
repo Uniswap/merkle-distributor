@@ -21,6 +21,7 @@
     "precompile": "rimraf ./build/",
     "compile": "npx hardhat compile",
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
+    "generate-merkle-root:sarcophagus": "ts-node scripts/generate-merkle-root.ts --input data/distributions.json",
     "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
     "prepublishOnly": "yarn test",
     "pretest": "yarn compile",
