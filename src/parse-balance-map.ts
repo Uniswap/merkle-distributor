@@ -14,7 +14,7 @@ interface MerkleDistributorInfo {
     [account: string]: {
       index: number
       amount: string
-      proof: string[]
+      proof: string
       flags?: {
         [flag: string]: boolean
       }
@@ -67,13 +67,14 @@ export function parseBalanceMap(balances: OldFormat | NewFormat[]): MerkleDistri
 
   // generate claims
   const claims = sortedAddresses.reduce<{
-    [address: string]: { amount: string; index: number; proof: string[]; flags?: { [flag: string]: boolean } }
+    [address: string]: { amount: string; index: number; proof: string; flags?: { [flag: string]: boolean } }
   }>((memo, address, index) => {
     const { amount, flags } = dataByAddress[address]
+
     memo[address] = {
       index,
-      amount: amount.toHexString(),
-      proof: tree.getProof(index, address, amount),
+      amount: amount.toString(),
+      proof: tree.getProof(index, address, amount).join(),
       ...(flags ? { flags } : {}),
     }
     return memo

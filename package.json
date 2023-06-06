@@ -28,7 +28,9 @@
     "test": "npx hardhat test"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.7.0"
+    "@openzeppelin/contracts": "4.7.0",
+    "@types/json2csv": "^5.0.3",
+    "json2csv": "^6.0.0-alpha.2"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",

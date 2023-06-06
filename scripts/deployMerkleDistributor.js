@@ -2,7 +2,7 @@ require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
-//  npx hardhat deploy --network goerli scripts/deployMerkleDistributor.js
+//  npx hardhat run --network goerli scripts/deployMerkleDistributor.js
 
 const MERKLE_ROOT = '0x5ac4b754720c2f81edfc60d2ad04ed850e21c08519743ff3780cc05a365466c8'
 const SARCO_TOKEN_ADDRESS = '0x4633b43990b41B57b3678c6F3Ac35bA75C3D8436'

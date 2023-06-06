@@ -1,6 +1,7 @@
 import { program } from 'commander'
 import fs from 'fs'
 import { parseBalanceMap } from '../src/parse-balance-map'
+import { parse } from 'json2csv';
 
 program
   .version('0.0.0')
@@ -14,5 +15,11 @@ program.parse(process.argv)
 const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
+
+const csv = parse(parseBalanceMap(json));
+fs.writeFile('proofs.csv', csv, (err) => {
+  if (err) throw err;
+  console.log('file saved');
+});
 
 console.log(JSON.stringify(parseBalanceMap(json)))
