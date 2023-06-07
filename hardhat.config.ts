@@ -2,6 +2,7 @@ require('dotenv').config()
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import "@nomiclabs/hardhat-etherscan";
+import { HardhatUserConfig } from "hardhat/config";
 
 import { SolcUserConfig } from 'hardhat/types';
 
@@ -24,14 +25,14 @@ const DEFAULT_COMPILER_SETTINGS: SolcUserConfig = {
     }
 };
 
-module.exports = {
+const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             chainId: 137,
-            forking: {
-                url: `https://polygon-rpc.com`,
-                blockNumber: 34298636
-            },
+            // forking: {
+            //     url: `https://polygon-rpc.com`,
+            //     blockNumber: 34298636
+            // },
             allowUnlimitedContractSize: true,
             loggingEnabled: false,
             accounts: {
@@ -39,219 +40,157 @@ module.exports = {
             }
         },
         eth: {
-            url: `https://mainnet.infura.io/v3/${process.env.INFURA_ID_PROJECT}`,
+            url: `https://eth.llamarpc.com`,
             chainId: 1,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         ropsten: {
             url: `https://ropsten.infura.io/v3/${process.env.INFURA_ID_PROJECT}`,
             chainId: 3,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         rinkeby: {
             url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID_PROJECT}`,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         goerli: {
             url: `https://goerli.infura.io/v3/${process.env.INFURA_ID_PROJECT}`,
             chainId: 5,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         kovan: {
             url: `https://kovan.infura.io/v3/${process.env.INFURA_ID_PROJECT}`,
             chainId: 42,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         bscTest: {
             url: `https://data-seed-prebsc-2-s3.binance.org:8545`,
             chainId: 97,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         bsc: {
             url: `https://bsc-dataseed.binance.org/`,
             chainId: 56,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         polygonMumbai: {
             url: `https://rpc-mumbai.maticvigil.com`,
             chainId: 80001,
-            live: false,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         polygon: {
             url: `https://polygon-rpc.com`,
             chainId: 137,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         avalanche: {
             url: `https://api.avax.network/ext/bc/C/rpc`,
             chainId: 43114,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         fantom: {
             url: `https://rpc.ftm.tools/`,
             chainId: 250,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         moonriver: {
             url: `https://rpc.api.moonriver.moonbeam.network`,
             chainId: 1285,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         arbitrum: {
             url: `https://arb1.arbitrum.io/rpc`,
             chainId: 42161,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         aurora: {
             url: `https://mainnet.aurora.dev`,
             chainId: 1313161554,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         optimism: {
             url: `https://mainnet.optimism.io`,
             chainId: 10,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         moonbeam: {
             url: `https://rpc.api.moonbeam.network`,
             chainId: 1284,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         gnosis: {
             url: `https://rpc.gnosischain.com/`,
             chainId: 100,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         cronos: {
             url: `https://evm-cronos.crypto.org`,
             chainId: 25,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         fuse: {
             url: `https://rpc.fuse.io`,
             chainId: 122,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         okx: {
             url: `https://exchainrpc.okex.org`,
             chainId: 66,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         celo: {
             url: `https://celo.quickestnode.com`,
             chainId: 42220,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         boba: {
             url: `https://mainnet.boba.network`,
             chainId: 288,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         telos: {
             url: `https://mainnet.telos.net/evm`,
             chainId: 40,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         kava: {
             url: 'https://evm.kava.io',
             chainId: 2222,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         bitgert: {
             url: 'https://rpc.icecreamswap.com',
             chainId: 32520,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         metis: {
             url: 'https://andromeda.metis.io/?owner=1088',
             chainId: 1088,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         oasis: {
             url: 'https://emerald.oasis.dev',
             chainId: 42262,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         klaytn: {
             url: 'https://public-node-api.klaytnapi.com/v1/cypress',
             chainId: 8217,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         velas: {
             url: 'https://evmexplorer.velas.com/rpc',
             chainId: 106,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         syscoin: {
             url: 'https://rpc.syscoin.org',
             chainId: 57,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         },
         defiKingdom: {
             url: 'https://subnets.avax.network/defi-kingdoms/dfk-chain/rpc',
             chainId: 53935,
-            live: true,
-            saveDeployments: true,
             accounts: [`0x${DEFAULT_PRIVATE_KEY}`]
         }
     },
@@ -357,5 +296,11 @@ module.exports = {
         alphaSort: false,
         disambiguatePaths: true,
         runOnCompile: false
-    }
+    },
+    typechain: {
+        outDir: 'typechain',
+        target: 'ethers-v5'
+    },
 };
+
+export default config;
