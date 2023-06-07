@@ -16,7 +16,9 @@ const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
-const csv = parse(parseBalanceMap(json));
+const merkleData = parseBalanceMap(json)
+
+const csv = parse(Object.entries(merkleData.claims));
 fs.writeFile('proofs.csv', csv, (err) => {
   if (err) throw err;
   console.log('file saved');
