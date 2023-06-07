@@ -13,23 +13,32 @@ const overrides = {
 }
 const gasUsed = {
   MerkleDistributor: {
-    twoAccountTree: 84237,
-    largerTreeFirstClaim: 87574,
-    largerTreeSecondClaim: 70474,
-    realisticTreeGas: 97523,
-    realisticTreeGasDeeperNode: 97439,
-    realisticTreeGasAverageRandom: 80865,
-    realisticTreeGasAverageFirst25: 64599,
+    twoAccountTree: 84453,
+    largerTreeFirstClaim: 89452,
+    largerTreeSecondClaim: 72352,
+    realisticTreeGas: 97739,
+    realisticTreeGasDeeperNode: 97655,
+    realisticTreeGasAverageRandom: 81081,
+    realisticTreeGasAverageFirst25: 64815,
   },
-  MerkleDistributorWithDeadline: {
-    twoAccountTree: 84311,
-    largerTreeFirstClaim: 87648,
-    largerTreeSecondClaim: 70548,
-    realisticTreeGas: 97597,
-    realisticTreeGasDeeperNode: 97513,
-    realisticTreeGasAverageRandom: 80939,
-    realisticTreeGasAverageFirst25: 64673,
-  },
+  // MerkleDistributorWithDeadline: {
+  //   twoAccountTree: 84527,
+  //   largerTreeFirstClaim: 89526,
+  //   largerTreeSecondClaim: 72426,
+  //   realisticTreeGas: 97597,
+  //   realisticTreeGasDeeperNode: 97513,
+  //   realisticTreeGasAverageRandom: 80939,
+  //   realisticTreeGasAverageFirst25: 64673,
+  // },
+  MerkleDistributorToStaking: {
+    twoAccountTree: 307652,
+    largerTreeFirstClaim: 312650,
+    largerTreeSecondClaim: 264150,
+    realisticTreeGas: 320937,
+    realisticTreeGasDeeperNode: 320853,
+    realisticTreeGasAverageRandom: 293239,
+    realisticTreeGasAverageFirst25: 276973,
+  }
 }
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -39,13 +48,17 @@ const deployContract = async (factory: ContractFactory, tokenAddress: string, me
   const currentTimestamp = Math.floor(Date.now() / 1000)
   if (contract === 'MerkleDistributorWithDeadline') {
     distributor = await factory.deploy(tokenAddress, merkleRoot, currentTimestamp + 31536000, overrides)
+  } else if (contract === 'MerkleDistributorToStaking') {
+    const stakingFactory = await ethers.getContractFactory('TestStaking', factory.signer)
+    const staking = await stakingFactory.deploy(tokenAddress, overrides)
+    distributor = await factory.deploy(tokenAddress, merkleRoot, staking.address, 2592000, overrides)
   } else {
     distributor = await factory.deploy(tokenAddress, merkleRoot, overrides)
   }
   return distributor
 }
 
-for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
+for (const contract of ['MerkleDistributor', 'MerkleDistributorToStaking']) {
   describe(`${contract} tests`, () => {
     let token: Contract
     let distributorFactory: ContractFactory
@@ -114,7 +127,25 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           const proof0 = tree.getProof(0, wallet0.address, BigNumber.from(100))
           expect(await token.balanceOf(wallet0.address)).to.eq(0)
           await distributor.claim(0, wallet0.address, 100, proof0, overrides)
-          expect(await token.balanceOf(wallet0.address)).to.eq(100)
+
+          if (contract === 'MerkleDistributorToStaking') {
+            const stakingAddress = await distributor.staking()
+            expect(await token.balanceOf(stakingAddress)).to.eq(100)
+
+            const stakingFactory = await ethers.getContractFactory('TestStaking', distributor.signer)
+            const staking = await stakingFactory.attach(stakingAddress)
+
+            expect(await staking.balanceOf(wallet0.address)).to.eq(1)
+
+            const timestamp = (await ethers.provider.getBlock('latest')).timestamp;
+            const { lockTime, lockStartTime, amount, lastRewardGrowth } = await staking.stakes(1)
+            expect(lockTime).to.be.eq(BigNumber.from(30*24*60*60))
+            expect(lockStartTime).to.be.eq(BigNumber.from(timestamp))
+            expect(amount).to.be.eq(BigNumber.from(100))
+            expect(lastRewardGrowth).to.be.eq(BigNumber.from(1))
+          } else {
+            expect(await token.balanceOf(wallet0.address)).to.eq(100)
+          }
         })
 
         it('must have enough to transfer', async () => {
@@ -362,11 +393,11 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
         }
         beforeEach('deploy', async () => {
           const { claims: innerClaims, merkleRoot, tokenTotal } = parseBalanceMap({
-            [wallet0.address]: 200,
-            [wallet1.address]: 300,
-            [wallets[2].address]: 250,
+            [wallet0.address]: '200',
+            [wallet1.address]: '300',
+            [wallets[2].address]: '250',
           })
-          expect(tokenTotal).to.eq('0x02ee') // 750
+          expect(tokenTotal).to.eq('750') // 750
           claims = innerClaims
           distributor = await deployContract(distributorFactory, token.address, merkleRoot, contract)
           await token.setBalance(distributor.address, tokenTotal)
@@ -376,7 +407,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           expect(claims).to.deep.eq({
             [wallet0.address]: {
               index: 2,
-              amount: '0xc8',
+              amount: '200',
               proof: [
                 '0x0782528e118c4350a2465fbeabec5e72fff06991a29f21c08d37a0d275e38ddd',
                 '0xf3c5acb53398e1d11dcaa74e37acc33d228f5da944fbdea9a918684074a21cdb',
@@ -384,7 +415,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             },
             [wallet1.address]: {
               index: 1,
-              amount: '0x012c',
+              amount: '300',
               proof: [
                 '0xc86fd316fa3e7b83c2665b5ccb63771e78abcc0429e0105c91dde37cb9b857a4',
                 '0xf3c5acb53398e1d11dcaa74e37acc33d228f5da944fbdea9a918684074a21cdb',
@@ -392,7 +423,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
             },
             [wallets[2].address]: {
               index: 0,
-              amount: '0xfa',
+              amount: '250',
               proof: ['0x0c9bcaca2a1013557ef7f348b514ab8a8cd6c7051b69e46b1681a2aff22f4a88'],
             },
           })
