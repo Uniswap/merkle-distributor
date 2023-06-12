@@ -1,7 +1,6 @@
 import { program } from 'commander'
 import fs from 'fs'
 import { parseBalanceMap } from '../src/parse-balance-map'
-import { parse } from 'json2csv';
 
 program
   .version('0.0.0')
@@ -18,7 +17,12 @@ if (typeof json !== 'object') throw new Error('Invalid JSON')
 
 const merkleData = parseBalanceMap(json)
 
-const csv = parse(Object.entries(merkleData.claims));
+let csv = 'index,account,amount,merkleProof\n';
+
+for(let key in merkleData.claims) {
+  csv += `${merkleData.claims[key].index},${key},${merkleData.claims[key].amount},"${merkleData.claims[key].proof}"\n`;
+}
+
 fs.writeFile('proofs.csv', csv, (err) => {
   if (err) throw err;
   console.log('file saved');

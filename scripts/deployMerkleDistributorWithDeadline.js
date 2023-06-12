@@ -2,13 +2,16 @@ require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 const { ethers } = require('hardhat')
 
+//  npx hardhat run --network goerli scripts/deployMerkleDistributorWithDeadline.js
+
+const MERKLE_ROOT = '0xa106777ce21246bc8d8b5389a36243ea5584429313ea07e6592c3173c5e226d7'
+const SARCO_TOKEN_ADDRESS = '0x4633b43990b41B57b3678c6F3Ac35bA75C3D8436'
 async function main() {
   const MerkleDistributorWithDeadline = await ethers.getContractFactory('MerkleDistributorWithDeadline')
   const merkleDistributorWithDeadline = await MerkleDistributorWithDeadline.deploy(
-    // USDC
-    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    '0xbe154afea9ba1e08729654a19c53952a892d6b37fe0b5d1bdf8ac4f51d03a426',
-    1688493524
+    SARCO_TOKEN_ADDRESS,
+    MERKLE_ROOT,
+    1686247988 // June 8th
   )
   await merkleDistributorWithDeadline.deployed()
   console.log(`merkleDistributorWithDeadline deployed at ${merkleDistributorWithDeadline.address}`)

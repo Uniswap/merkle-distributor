@@ -4,7 +4,7 @@ const { ethers } = require('hardhat')
 
 //  npx hardhat run --network goerli scripts/deployMerkleDistributor.js
 
-const MERKLE_ROOT = '0x5ac4b754720c2f81edfc60d2ad04ed850e21c08519743ff3780cc05a365466c8'
+const MERKLE_ROOT = '0xa106777ce21246bc8d8b5389a36243ea5584429313ea07e6592c3173c5e226d7'
 const SARCO_TOKEN_ADDRESS = '0x4633b43990b41B57b3678c6F3Ac35bA75C3D8436'
 
 async function main() {
