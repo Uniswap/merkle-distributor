@@ -4,3 +4,9 @@ wrangler.toml
 artifacts/
 .idea
 cache/
+.env.local
+data/*
+!data/example.json
+!data/complex_example.json
+!data/new_example.json
+!data/result.json

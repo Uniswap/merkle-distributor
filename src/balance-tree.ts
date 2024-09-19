@@ -6,9 +6,13 @@ export default class BalanceTree {
   constructor(balances: { account: string; amount: BigNumber }[]) {
     this.tree = new MerkleTree(
       balances.map(({ account, amount }, index) => {
+        process.stdout.clearLine(0);
+        process.stdout.cursorTo(0);
+        process.stdout.write(`Adding node: ${index + 1}/${balances.length} entries`)
         return BalanceTree.toNode(index, account, amount)
       })
     )
+    console.log("\n")
   }
 
   public static verifyProof(

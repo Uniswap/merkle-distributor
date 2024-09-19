@@ -4,7 +4,7 @@ import { solidity } from 'ethereum-waffle'
 import { BigNumber, constants, Contract, ContractFactory } from 'ethers'
 import { ethers } from 'hardhat'
 import BalanceTree from '../src/balance-tree'
-import { parseBalanceMap } from '../src/parse-balance-map'
+import { parseBalances } from '../src/parse-balances'
 
 chai.use(solidity)
 
@@ -351,7 +351,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
         })
       })
 
-      describe('parseBalanceMap', () => {
+      describe('parseBalances', () => {
         let distributor: Contract
         let claims: {
           [account: string]: {
@@ -361,7 +361,7 @@ for (const contract of ['MerkleDistributor', 'MerkleDistributorWithDeadline']) {
           }
         }
         beforeEach('deploy', async () => {
-          const { claims: innerClaims, merkleRoot, tokenTotal } = parseBalanceMap({
+          const { claims: innerClaims, merkleRoot, tokenTotal } = parseBalances({
             [wallet0.address]: 200,
             [wallet1.address]: 300,
             [wallets[2].address]: 250,
