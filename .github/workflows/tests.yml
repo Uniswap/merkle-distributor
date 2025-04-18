@@ -1,12 +1,6 @@
 name: Tests
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   unit-tests:
@@ -15,19 +9,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - id: nodeversion
+        run: echo "version=$(grep nodejs .tool-versions | sed -e 's/[^[:space:]]*[[:space:]]*//')" >> $GITHUB_OUTPUT
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
-
-      - id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
-      - run: yarn
+          node-version: ${{ steps.nodeversion.outputs.version }}
+          cache: yarn
+      - run: yarn install --immutable
       - run: yarn test
+      - run: yarn hardhat compile
+      - run: ./build-package.sh ./package

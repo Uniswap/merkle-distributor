@@ -1,12 +1,6 @@
 name: Lint
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   run-linters:
@@ -14,17 +8,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
-
-      - name: Set up node
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
         with:
-          node-version: 16
-
+          fetch-depth: 0
+      - id: nodeversion
+        run: echo "version=$(grep nodejs .tool-versions | sed -e 's/[^[:space:]]*[[:space:]]*//')" >> $GITHUB_OUTPUT
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.nodeversion.outputs.version }}
+          cache: yarn
       - name: Install dependencies
-        run: yarn
-
+        run: yarn install --immutable
       - name: Run linters
         uses: wearerequired/lint-action@v1
         with:
