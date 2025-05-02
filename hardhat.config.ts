@@ -4,6 +4,7 @@
 require('dotenv').config()
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
+import '@nomicfoundation/hardhat-verify'
 
 module.exports = {
   solidity: {
@@ -36,5 +37,13 @@ module.exports = {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`, // or any other JSON-RPC provider
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_KEY}`, // Infura RPC for Sepolia
+      chainId: 11155111, // Sepolia's chain ID
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY, // Add your Etherscan API key
   },
 }

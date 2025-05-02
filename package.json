@@ -21,7 +21,8 @@
     "precompile": "rimraf ./build/",
     "compile": "npx hardhat compile",
     "generate-merkle-root": "ts-node scripts/generate-merkle-root.ts",
-    "generate-merkle-root:example": "ts-node scripts/generate-merkle-root.ts --input scripts/example.json",
+    "generate-merkle-root:claim": "ts-node scripts/generate-merkle-root.ts --input scripts/claimData.json # outputs to scripts/result.json",
+    "deploy-merkle-distributor:claim": "npx hardhat run scripts/deployMerkleDistributor.js --network sepolia",
     "prepublishOnly": "yarn test",
     "pretest": "yarn compile",
     "test": "npx hardhat test"
@@ -30,6 +31,7 @@
     "@openzeppelin/contracts": "4.7.0"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@types/chai": "^4.2.6",

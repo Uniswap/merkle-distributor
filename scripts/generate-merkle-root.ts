@@ -15,4 +15,6 @@ const json = JSON.parse(fs.readFileSync(program.input, { encoding: 'utf8' }))
 
 if (typeof json !== 'object') throw new Error('Invalid JSON')
 
-console.log(JSON.stringify(parseBalanceMap(json)))
+const result = parseBalanceMap(json)
+fs.writeFileSync('scripts/result.json', JSON.stringify(result, null, 2))
+console.log('Merkle root data has been written to scripts/result.json')
